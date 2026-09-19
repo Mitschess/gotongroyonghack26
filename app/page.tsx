@@ -79,7 +79,7 @@ export default function Home() {
   const [invoices, setInvoices] = useState<Invoice[]>(INITIAL_INVOICES);
   const [whatsappMessages, setWhatsappMessages] = useState<WhatsAppMessage[]>(INITIAL_WHATSAPP_MESSAGES);
 
-  const [activeTab, setActiveTab] = useState<string>('todays_actions');
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [globalSearch, setGlobalSearch] = useState<string>('');
 
   // Selected Work Order for deep view
@@ -529,7 +529,7 @@ export default function Home() {
           } else if (user.role === 'finance') {
             setActiveTab('finance');
           } else {
-            setActiveTab('todays_actions');
+            setActiveTab('dashboard');
           }
           logActivity('User Login', `Berhasil masuk sebagai ${user.name} (${user.role})`);
         }} 
@@ -575,24 +575,7 @@ export default function Home() {
             />
           ) : (
             <>
-              {activeTab === 'todays_actions' && (
-                <TodaysActionsView
-                  workOrders={workOrders}
-                  tasks={tasks}
-                  documents={documents}
-                  onNavigateTab={(tab) => setActiveTab(tab)}
-                  onSendWhatsappReminder={() => {}}
-                  onOpenReview={(woId) => {
-                    const wo = workOrders.find(w => w.id === woId);
-                    if (wo) {
-                      setSelectedWoFromDashboard(wo);
-                      setActiveTab('workorders');
-                    }
-                  }}
-                />
-              )}
-
-              {activeTab === 'dashboard' && (
+              {(activeTab === 'dashboard' || activeTab === 'todays_actions') && (
                 <DashboardView
                   currentUser={currentUser}
                   workOrders={workOrders}
@@ -605,6 +588,12 @@ export default function Home() {
                   onSelectWorkOrder={(wo) => {
                     setSelectedWoFromDashboard(wo);
                     setActiveTab('workorders');
+                  }}
+                  onSendWhatsappReminder={(woId, recipientName, role) => {
+                    const wo = workOrders.find(w => w.id === woId);
+                    if (wo) {
+                      triggerWaNotification(wo.woNumber, wo.clientName, `Reminder Follow-Up (${role}: ${recipientName})`);
+                    }
                   }}
                 />
               )}

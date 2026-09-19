@@ -18,14 +18,14 @@ export async function POST(req: NextRequest) {
       : cleanNumber;
 
     const fonnteToken = process.env.FONNTE_TOKEN || process.env.WA_GATEWAY_TOKEN;
-    const gatewayUrl = process.env.WA_GATEWAY_URL || 'https://api.fonnte.com/send-message';
+    const gatewayUrl = process.env.WA_GATEWAY_URL || 'https://api.fonnte.com/send';
 
     // If API Token is configured, perform direct background HTTP POST to Gateway
     if (fonnteToken) {
       const response = await fetch(gatewayUrl, {
         method: 'POST',
         headers: {
-          'Authorization': fonnteToken,
+          'Authorization': fonnteToken.trim(),
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -37,11 +37,11 @@ export async function POST(req: NextRequest) {
 
       const data = await response.json();
       return NextResponse.json({
-        success: true,
+        success: data?.status !== false,
         provider: 'FONNTE_GATEWAY',
         target: formattedNumber,
         apiResult: data,
-        message: 'Pesan berhasil terkirim langsung ke HP via WhatsApp Gateway API'
+        message: data?.status === false ? (data?.reason || 'Gagal dari Fonnte Gateway') : 'Pesan berhasil terkirim langsung ke HP via WhatsApp Gateway API'
       });
     }
 

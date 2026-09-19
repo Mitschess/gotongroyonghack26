@@ -60,11 +60,10 @@ export default function Sidebar({
   // Grouped menu structure for staff/admin roles
   const menuGroups: MenuGroup[] = [
     {
-      groupLabel: 'Quick Actions',
+      groupLabel: 'Utama',
       defaultOpen: true,
       items: [
-        { id: 'todays_actions', label: "Today's Actions", icon: Zap, roles: ['super_admin', 'admin', 'technical'] },
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'] },
+        { id: 'dashboard', label: 'Dashboard & Actions', icon: LayoutDashboard, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'] },
       ]
     },
     {

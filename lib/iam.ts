@@ -26,9 +26,9 @@ export const IAM_TAB_PERMISSIONS: Record<string, UserRole[]> = {
 
 // Default landing page by IAM role
 export const IAM_DEFAULT_LANDING: Record<UserRole, string> = {
-  super_admin: 'todays_actions',
-  admin: 'todays_actions',
-  technical: 'todays_actions',
+  super_admin: 'dashboard',
+  admin: 'dashboard',
+  technical: 'dashboard',
   finance: 'finance',
   notary: 'notary_tasks',
   client: 'dashboard',

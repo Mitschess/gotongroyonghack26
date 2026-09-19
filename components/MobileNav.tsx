@@ -38,9 +38,8 @@ export default function MobileNav({
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   const primaryMobileTabs = [
-    { id: 'todays_actions', label: 'Tindakan', icon: Zap },
-    { id: 'notary_tasks', label: 'Tugas Notaris', icon: Zap },
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'notary_tasks', label: 'Tugas Notaris', icon: Zap },
     { id: 'workorders', label: 'Work Order', icon: FolderKanban },
     { id: 'whatsapp', label: 'WA Proxy', icon: MessageSquare },
   ];

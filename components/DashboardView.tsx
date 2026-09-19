@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   FolderKanban, 
   CheckCircle2, 
@@ -13,8 +13,13 @@ import {
   UserCheck,
   Zap,
   Activity,
+  Send,
+  Filter,
+  CheckCircle,
+  MessageSquare,
+  ArrowUpRight
 } from 'lucide-react';
-import { WorkOrder, Client, Task, ApprovalRequest, ActivityLog, User, UserRole } from '../types/legal';
+import { WorkOrder, Client, Task, ApprovalRequest, ActivityLog, User, UserRole, LegalDocument } from '../types/legal';
 
 interface DashboardViewProps {
   workOrders: WorkOrder[];
@@ -26,6 +31,7 @@ interface DashboardViewProps {
   currentUser: User;
   onNavigateTab: (tab: string) => void;
   onSelectWorkOrder: (wo: WorkOrder) => void;
+  onSendWhatsappReminder?: (woId: string, recipientName: string, role: string) => void;
 }
 
 // Minimalist Light SaaS KPI card colors
@@ -107,7 +113,8 @@ export default function DashboardView({
   users,
   currentUser,
   onNavigateTab,
-  onSelectWorkOrder
+  onSelectWorkOrder,
+  onSendWhatsappReminder
 }: DashboardViewProps) {
   // IAM-based data scoping
   const isClient = currentUser.role === 'client';
@@ -120,6 +127,30 @@ export default function DashboardView({
     : isNotary
     ? workOrders.filter(w => w.notaryId === currentUser.id)
     : workOrders;
+
+  // Today's Action Engine State
+  const [filterRole, setFilterRole] = useState<'ALL' | 'CLIENT' | 'NOTARY' | 'ADMIN'>('ALL');
+  const [sentReminders, setSentReminders] = useState<Record<string, boolean>>({});
+
+  const clientFollowups = scopedWorkOrders.filter(w => w.blockedOn === 'CLIENT' && w.status !== 'Completed');
+  const notaryDelays = scopedWorkOrders.filter(w => w.blockedOn === 'NOTARY' && w.status !== 'Completed');
+  const pendingReviews = scopedWorkOrders.filter(w => (w.blockedOn === 'ADMIN' || w.status === 'Review') && w.status !== 'Completed');
+  const criticalProjects = scopedWorkOrders.filter(w => w.health === 'CRITICAL' || w.health === 'HIGH_RISK');
+
+  const filteredActionOrders = scopedWorkOrders.filter(w => {
+    if (w.status === 'Completed') return false;
+    if (filterRole === 'CLIENT') return w.blockedOn === 'CLIENT';
+    if (filterRole === 'NOTARY') return w.blockedOn === 'NOTARY';
+    if (filterRole === 'ADMIN') return w.blockedOn === 'ADMIN';
+    return true;
+  });
+
+  const handleReminder = (woId: string, name: string, role: string) => {
+    if (onSendWhatsappReminder) {
+      onSendWhatsappReminder(woId, name, role);
+    }
+    setSentReminders(prev => ({ ...prev, [woId]: true }));
+  };
 
   const [selectedTimelineWoId, setSelectedTimelineWoId] = React.useState<string>(scopedWorkOrders[0]?.id || workOrders[0]?.id);
   const activeTimelineWo = (isClient || isNotary)
@@ -170,17 +201,17 @@ export default function DashboardView({
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold mb-2 bg-indigo-50 text-indigo-700 border border-indigo-100">
               <Zap className="h-3.5 w-3.5 text-indigo-600" />
-              {isClient ? 'Client Portal — Status Proyek Legalitas Anda' : isNotary ? 'Notary Portal — Penugasan Akta & Dokumen' : 'Live — Monitoring Operasional Legal'}
+              {isClient ? 'Client Portal — Status Proyek Legalitas Anda' : isNotary ? 'Notary Portal — Penugasan Akta & Dokumen' : 'Live — Monitoring & Action-First Dashboard'}
             </div>
             <h2 className="text-xl md:text-2xl font-black tracking-tight text-slate-900">
-              {isClient ? `Halo, ${currentUser.name.split('(')[0].trim()} 👋` : isNotary ? `Notaris Dashboard` : 'Legal Work Management'}
+              {isClient ? `Halo, ${currentUser.name.split('(')[0].trim()} 👋` : isNotary ? `Notaris Dashboard` : 'Legal Work Management Dashboard'}
             </h2>
             <p className="text-xs md:text-sm mt-1 text-slate-500 max-w-xl">
               {isClient
                 ? 'Pantau status dan perkembangan seluruh proyek legalitas perusahaan Anda secara real-time.'
                 : isNotary
                 ? 'Tampilan penugasan akta, minuta, dan Work Order yang membutuhkan tindakan notaris.'
-                : 'Pusat kendali berkas, proyek legalitas, approval hirarki, dan pemantauan deadline perusahaan secara terstruktur.'}
+                : 'Pusat kendali berkas, prioritas tindakan hari ini, approval hirarki, dan pemantauan deadline secara terintegrasi.'}
             </p>
           </div>
           <button
@@ -236,6 +267,139 @@ export default function DashboardView({
           ))}
         </div>
       )}
+
+      {/* Today's Priority Actions Engine (Unified inside Dashboard) */}
+      <div className="rounded-2xl p-5 bg-white border border-slate-200 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold mb-1 bg-amber-50 text-amber-700 border border-amber-200">
+              <Zap className="h-3 w-3 text-amber-600" /> Today&apos;s Actions Engine
+            </div>
+            <h3 className="text-base font-black text-slate-900">Tindakan & Follow-Up Hari Ini</h3>
+            <p className="text-xs text-slate-500">Prioritas pekerjaan berurutan yang membutuhkan tindakan 1-klik</p>
+          </div>
+
+          {/* Action Counters Bar */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+              <span className="font-bold text-amber-700">Client: </span>
+              <span className="font-black text-slate-900">{clientFollowups.length}</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+              <span className="font-bold text-rose-700">Notaris: </span>
+              <span className="font-black text-slate-900">{notaryDelays.length}</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+              <span className="font-bold text-indigo-700">Review: </span>
+              <span className="font-black text-slate-900">{pendingReviews.length}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <span className="text-xs font-bold flex items-center gap-1 shrink-0 text-slate-400">
+            <Filter className="h-3.5 w-3.5" /> Filter:
+          </span>
+          {[
+            { key: 'ALL', label: 'Semua Aksi' },
+            { key: 'CLIENT', label: 'Tunggu Client' },
+            { key: 'NOTARY', label: 'Tunggu Notaris' },
+            { key: 'ADMIN', label: 'Review Admin' },
+          ].map((item) => (
+            <button
+              key={item.key}
+              onClick={() => setFilterRole(item.key as any)}
+              className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+                filterRole === item.key
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Action Items List */}
+        <div className="space-y-2.5">
+          {filteredActionOrders.length === 0 ? (
+            <div className="rounded-xl p-6 text-center bg-slate-50 border border-slate-200">
+              <CheckCircle className="h-8 w-8 mx-auto mb-2 text-emerald-500" />
+              <p className="text-xs font-bold text-slate-800">Semua Tindakan Selesai!</p>
+              <p className="text-[11px] text-slate-500">Tidak ada item follow-up untuk filter ini.</p>
+            </div>
+          ) : (
+            filteredActionOrders.map((wo) => {
+              const isSent = sentReminders[wo.id];
+              return (
+                <div
+                  key={wo.id}
+                  className="rounded-xl p-3.5 bg-slate-50/70 border border-slate-200 hover:bg-white hover:shadow-xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                >
+                  <div className="space-y-0.5 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap text-xs">
+                      <span className="font-mono font-black text-indigo-600">{wo.woNumber}</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
+                        Blocked: {wo.blockedOn}
+                      </span>
+                      <span className="text-[10px] font-extrabold text-slate-500">{wo.clientName}</span>
+                    </div>
+                    <p className="text-xs font-extrabold text-slate-900">{wo.serviceName}</p>
+                    <p className="text-[11px] text-slate-600 font-medium">
+                      👉 {wo.blockedOn === 'NOTARY' ? 'Follow up Notaris Soebagjo untuk upload Minuta Akta Final' : wo.blockedOn === 'CLIENT' ? 'Follow up Klien untuk unggah Surat Pernyataan Merek' : 'Dokumen Draf RUPS & persetujuan Manager'}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    {wo.blockedOn === 'NOTARY' && (
+                      <button
+                        onClick={() => handleReminder(wo.id, 'Notaris Soebagjo', 'Notary')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                          isSent ? 'bg-slate-200 text-slate-600' : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                        }`}
+                      >
+                        <Send className="h-3 w-3" />
+                        {isSent ? 'Terkirim ✓' : 'Hubungi Notaris (WA)'}
+                      </button>
+                    )}
+
+                    {wo.blockedOn === 'CLIENT' && (
+                      <button
+                        onClick={() => handleReminder(wo.id, wo.clientName, 'Client')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                          isSent ? 'bg-slate-200 text-slate-600' : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                        }`}
+                      >
+                        <Send className="h-3 w-3" />
+                        {isSent ? 'Terkirim ✓' : 'Reminder Client (WA)'}
+                      </button>
+                    )}
+
+                    {(wo.blockedOn === 'ADMIN' || wo.status === 'Review') && (
+                      <button
+                        onClick={() => onSelectWorkOrder(wo)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white transition-all"
+                      >
+                        <FileCheck2 className="h-3 w-3" />
+                        Review WO
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => onSelectWorkOrder(wo)}
+                      className="p-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs"
+                      title="Detail WO"
+                    >
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
 
       {/* Side-by-Side Grid: Progress Work Order & Client Timeline Tracker */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
