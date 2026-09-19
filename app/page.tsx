@@ -566,35 +566,6 @@ export default function Home() {
 
         {/* Dynamic Views Viewport */}
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 space-y-6 pb-28 md:pb-6">
-          {activeTab === 'todays_actions' && (
-            <TodaysActionsView
-              workOrders={workOrders}
-              tasks={tasks}
-              documents={documents}
-              onNavigateTab={(tab) => setActiveTab(tab)}
-              onSendWhatsappReminder={(woId, recipient, role) => {
-                const wo = workOrders.find(w => w.id === woId);
-                handleSendWhatsappMessage({
-                  workOrderId: woId,
-                  workOrderNumber: wo?.woNumber,
-                  senderRole: 'Platform',
-                  recipientRole: role as any,
-                  messageText: `[Reminder ${wo?.woNumber}] Halo ${recipient}, mohon kelengkapan dokumen perizinan diselesaikan.`,
-                  templateCode: 'wa_task_reminder'
-                });
-              }}
-              onOpenReview={(woId) => {
-                const wo = workOrders.find(w => w.id === woId);
-                if (wo) {
-                  setSelectedWoFromDashboard(wo);
-                  setActiveTab('workorders');
-                } else {
-                  setActiveTab('approvals');
-                }
-              }}
-            />
-          )}
-
           {!canAccessTab(currentUser.role, activeTab) ? (
             <IamGuard
               userRole={currentUser.role}

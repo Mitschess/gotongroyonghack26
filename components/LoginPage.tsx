@@ -275,6 +275,15 @@ export default function LoginPage({ users, onLogin }: LoginPageProps) {
             <span>Isi Otomatis (Demo Admin)</span>
           </button>
 
+          {/* Go to Public Form Button */}
+          <a
+            href="/form"
+            className="w-full flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 border border-indigo-200 bg-indigo-50 text-indigo-600 font-medium text-sm hover:bg-indigo-100 hover:border-indigo-300 transition-all cursor-pointer"
+          >
+            <span className="text-[11px]">📝</span>
+            <span>Isi Form Publik (Tanpa Login)</span>
+          </a>
+
           {/* Footer note */}
           <p className="text-center text-[11px] text-slate-400">
             Protected by TLS 1.3 · Waktunya Legal Legal OS © 2026
