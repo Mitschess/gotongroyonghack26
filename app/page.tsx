@@ -92,11 +92,11 @@ export default function Home() {
     waLink: string;
   } | null>(null);
 
-  // Helper to trigger automated WhatsApp Notification to +6281515716564
-  const triggerWaNotification = async (woNumber: string, clientName: string, updateDetail: string) => {
-    const targetPhone = '0815-1571-6564';
-    const rawNumber = '6281515716564';
-    const msgText = `🔔 *[LexiFlow WO Update]*\n📋 Work Order: *${woNumber}*\n🏢 Klien: *${clientName}*\n📌 Status: ${updateDetail}\n\nDiproses oleh: ${currentUser.name} (${currentUser.role})\n⏰ Waktu: ${new Date().toLocaleTimeString('id-ID')} WIB`;
+  // Helper to trigger automated WhatsApp Notification via Fonnte Gateway API
+  const triggerWaNotification = async (woNumber: string, clientName: string, updateDetail: string, customPhone?: string) => {
+    const targetPhone = customPhone || '0819-1632-3073';
+    const rawNumber = targetPhone.replace(/[^0-9]/g, '');
+    const msgText = `🔔 *[Waktunya Legal - WO Update]*\n📋 Work Order: *${woNumber}*\n🏢 Klien: *${clientName}*\n📌 Status: ${updateDetail}\n\nDiproses oleh: ${currentUser.name} (${currentUser.role})\n⏰ Waktu: ${new Date().toLocaleTimeString('id-ID')} WIB`;
 
     // 1. Dispatch into WhatsApp Messages state
     const newWaMsg: WhatsAppMessage = {
@@ -104,7 +104,7 @@ export default function Home() {
       workOrderId: woNumber,
       workOrderNumber: woNumber,
       senderRole: 'Platform',
-      senderName: 'System Bot LexiFlow (WA Gateway API)',
+      senderName: 'System Bot Waktunya Legal (WA Gateway API)',
       maskedPhone: targetPhone,
       recipientRole: 'Client',
       messageText: msgText,
@@ -118,7 +118,7 @@ export default function Home() {
 
     // 2. Automated background POST request to API Route Gateway (/api/whatsapp/send)
     try {
-      await fetch('/api/whatsapp/send', {
+      const res = await fetch('/api/whatsapp/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -127,8 +127,10 @@ export default function Home() {
           woNumber
         })
       });
+      const data = await res.json();
+      console.log('WA Gateway API Response:', data);
     } catch (err) {
-      console.log('WA Gateway background trigger:', err);
+      console.log('WA Gateway background trigger error:', err);
     }
 
     // 3. Show floating WA toast banner with direct link (Instant backup)
@@ -737,6 +739,13 @@ export default function Home() {
                   notaryName={currentUser.name}
                   onUploadDocument={handleUploadDocument}
                   onNavigateTab={(tab) => setActiveTab(tab)}
+                  onAddWorkNote={(woId, note) => {
+                    handleAddWorkNote(woId, note);
+                    const targetWo = workOrders.find(w => w.id === woId);
+                    if (targetWo) {
+                      triggerWaNotification(targetWo.woNumber, targetWo.clientName, `Permintaan Revisi dari Notaris: ${note.substring(0, 60)}...`);
+                    }
+                  }}
                 />
               )}
             </>

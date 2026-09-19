@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { targetPhone, messageText, woNumber } = body;
 
-    const recipient = targetPhone || '081515716564';
+    const recipient = targetPhone || '081916323073';
     const cleanNumber = recipient.replace(/[^0-9]/g, '');
     const formattedNumber = cleanNumber.startsWith('0') 
       ? '62' + cleanNumber.slice(1) 
@@ -22,26 +22,35 @@ export async function POST(req: NextRequest) {
 
     // If API Token is configured, perform direct background HTTP POST to Gateway
     if (fonnteToken) {
+      console.log(`[WA GATEWAY] Sending notification to ${formattedNumber} via Fonnte...`);
+
+      // Fonnte accepts FormData natively
+      const formData = new FormData();
+      formData.append('target', formattedNumber);
+      formData.append('message', messageText);
+      formData.append('countryCode', '62');
+
       const response = await fetch(gatewayUrl, {
         method: 'POST',
         headers: {
           'Authorization': fonnteToken.trim(),
-          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          target: formattedNumber,
-          message: messageText,
-          countryCode: '62',
-        }),
+        body: formData,
       });
 
       const data = await response.json();
+      console.log('[WA GATEWAY RESPONSE]', data);
+
+      const isSuccess = data?.status === true || data?.status === 'true';
+
       return NextResponse.json({
-        success: data?.status !== false,
+        success: isSuccess,
         provider: 'FONNTE_GATEWAY',
         target: formattedNumber,
         apiResult: data,
-        message: data?.status === false ? (data?.reason || 'Gagal dari Fonnte Gateway') : 'Pesan berhasil terkirim langsung ke HP via WhatsApp Gateway API'
+        message: isSuccess 
+          ? 'Pesan berhasil terkirim langsung ke HP via WhatsApp Gateway API'
+          : `Gagal dari Fonnte Gateway: ${data?.reason || data?.message || JSON.stringify(data)}`
       });
     }
 

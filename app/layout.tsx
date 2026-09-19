@@ -23,7 +23,7 @@ export default function RootLayout({
       lang="id"
       className={`${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900">{children}</body>
+      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900" suppressHydrationWarning>{children}</body>
     </html>
   );
 }
