@@ -160,17 +160,19 @@ export default function ServicesView({
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
-              <button
-                onClick={() => {
-                  setSelectedServiceForRequest(service);
-                  setShowRequestModal(true);
-                }}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 text-xs shadow-md transition-all"
-              >
-                Buat Permintaan Layanan (Service Request FR-09)
-              </button>
-            </div>
+            {userRole === 'client' && (
+              <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  onClick={() => {
+                    setSelectedServiceForRequest(service);
+                    setShowRequestModal(true);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 text-xs shadow-md transition-all cursor-pointer"
+                >
+                  Buat Permintaan Layanan (Service Request FR-09)
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>

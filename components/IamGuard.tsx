@@ -44,7 +44,7 @@ export default function IamGuard({ userRole, userName, tabId, onNavigateTab }: I
             <span className="font-mono text-indigo-600 uppercase text-[11px]">{tabId}</span>
           </div>
           <p className="text-[11px] text-slate-500">
-            Sesuai kebijakan keamanan data LexiFlow Legal Work OS (Role-Based Access Control), role ini tidak diberikan izin untuk membaca atau memodifikasi data pada modul ini.
+            Sesuai kebijakan keamanan data Waktunya Legal Work OS (Role-Based Access Control), role ini tidak diberikan izin untuk membaca atau memodifikasi data pada modul ini.
           </p>
         </div>
 

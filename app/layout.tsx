@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "LexiFlow | Legal Work Management System",
+  title: "Waktunya Legal | Legal Work Management System",
   description: "Sistem Terpadu Pengelolaan Pekerjaan, Layanan Legalitas, Dokumen, dan Approval Perusahaan Legal",
 };
 

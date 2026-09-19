@@ -87,11 +87,11 @@ export default function LoginPage({ users, onLogin }: LoginPageProps) {
               <Scale className="h-5 w-5" />
             </div>
             <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-              LexiFlow <span className="text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">IAM Portal</span>
+              Waktunya Legal <span className="text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">IAM Portal</span>
             </h1>
           </div>
           <p className="text-xs text-slate-500 max-w-md mx-auto">
-            Sistem Autentikasi Terpusat Identity & Access Management (IAM) dengan Zero-Trust Security & Multi-Tenant Role Policies
+            Sistem Autentikasi Identity & Access Management (IAM) Waktunya Legal dengan Multi-Tenant Role Policies
           </p>
         </div>
 

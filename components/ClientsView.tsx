@@ -140,11 +140,27 @@ export default function ClientsView({
         {filteredClients.map((client) => {
           const clientWoList = workOrders.filter(w => w.clientId === client.id);
           const clientDocList = documents.filter(d => d.clientId === client.id);
+          
+          const totalReq = 5;
+          const completedCount = Math.min(totalReq, clientDocList.length > 0 ? clientDocList.length + 1 : 0);
+          const progressPercent = Math.round((completedCount / totalReq) * 100);
+
+          const statusColor = progressPercent === 100 
+            ? 'bg-emerald-500' 
+            : progressPercent > 0 
+            ? 'bg-amber-500' 
+            : 'bg-rose-500';
+
+          const badgeClass = progressPercent === 100
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            : progressPercent > 0
+            ? 'bg-amber-50 text-amber-700 border-amber-200'
+            : 'bg-rose-50 text-rose-700 border-rose-200';
 
           return (
             <div
               key={client.id}
-              onClick={() => setSelectedClient(client)}
+              onClick={() => setDrawerClient(client)}
               className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:shadow-md transition-all hover:border-indigo-300 flex flex-col justify-between group"
             >
               <div>
@@ -172,13 +188,19 @@ export default function ClientsView({
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                 <span className="flex items-center gap-1 font-semibold text-slate-700">
                   <FolderKanban className="h-3.5 w-3.5 text-indigo-600" /> {clientWoList.length} Project Active
                 </span>
-                <span className="flex items-center gap-1 text-slate-400">
-                  <FileText className="h-3.5 w-3.5" /> {clientDocList.length} Dokumen
-                </span>
+
+                <div className="flex items-center gap-1.5">
+                  <div className="w-12 bg-slate-100 h-1.5 rounded-full overflow-hidden shrink-0">
+                    <div className={`h-full rounded-full ${statusColor}`} style={{ width: `${progressPercent}%` }} />
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${badgeClass}`}>
+                    {completedCount}/{totalReq} Dokumen
+                  </span>
+                </div>
               </div>
             </div>
           );
@@ -370,6 +392,25 @@ export default function ClientsView({
             </form>
           </div>
         </div>
+      )}
+
+      {/* Slide-over Document Completeness Audit Drawer */}
+      {drawerClient && (
+        <ClientDocumentDrawer
+          client={drawerClient}
+          documents={documents}
+          onClose={() => setDrawerClient(null)}
+          onSendWhatsappReminder={(clientName, phone, missingItems) => {
+            if (onSendWhatsappMessage) {
+              onSendWhatsappMessage({
+                clientName,
+                clientPhone: phone,
+                message: `Halo ${clientName}, mohon lengkapi berkas legalitas berikut: ${missingItems.join(', ')}.`
+              });
+            }
+          }}
+          onUploadDocument={onUploadDocument}
+        />
       )}
     </div>
   );
