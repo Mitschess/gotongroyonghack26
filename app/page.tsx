@@ -23,7 +23,7 @@ import PublicFormView from '../components/PublicFormView';
 import MobileNav from '../components/MobileNav';
 import LoginPage from '../components/LoginPage';
 import IamGuard from '../components/IamGuard';
-import { canAccessTab, IAM_DEFAULT_LANDING } from '../lib/iam';
+import { canAccessTab, IAM_DEFAULT_LANDING, scopeWorkOrders } from '../lib/iam';
 
 import { 
   INITIAL_USERS, 
@@ -598,37 +598,6 @@ export default function Home() {
             />
           )}
 
-          {activeTab === 'public_form' && (
-            <PublicFormView />
-          )}
-
-          {activeTab === 'whatsapp' && (
-            <WhatsAppHubView
-              workOrders={workOrders}
-              messages={whatsappMessages}
-              onSendMessage={handleSendWhatsappMessage}
-            />
-          )}
-
-          {activeTab === 'ai' && (
-            <AIFeaturesView
-              workOrders={workOrders}
-              documents={documents}
-              onApplyOcrData={handleApplyOcrData}
-            />
-          )}
-
-          {activeTab === 'client_portal' && (
-            <ClientMobilePortalView
-              workOrders={workOrders}
-              documents={documents}
-              clientName={currentUser.name}
-              onUploadDoc={handleUploadDocument}
-              onNavigateTab={(tab) => setActiveTab(tab)}
-            />
-          )}
-
-          {activeTab === 'notary_tasks' && (
           {!canAccessTab(currentUser.role, activeTab) ? (
             <IamGuard
               userRole={currentUser.role}
@@ -642,11 +611,15 @@ export default function Home() {
                 <TodaysActionsView
                   workOrders={workOrders}
                   tasks={tasks}
-                  approvals={approvals}
+                  documents={documents}
                   onNavigateTab={(tab) => setActiveTab(tab)}
-                  onSelectWorkOrder={(wo) => {
-                    setSelectedWoFromDashboard(wo);
-                    setActiveTab('workorders');
+                  onSendWhatsappReminder={() => {}}
+                  onOpenReview={(woId) => {
+                    const wo = workOrders.find(w => w.id === woId);
+                    if (wo) {
+                      setSelectedWoFromDashboard(wo);
+                      setActiveTab('workorders');
+                    }
                   }}
                 />
               )}
@@ -654,13 +627,12 @@ export default function Home() {
               {activeTab === 'dashboard' && (
                 <DashboardView
                   currentUser={currentUser}
-                  userRole={currentUser.role}
                   workOrders={workOrders}
-                  services={services}
                   clients={clients}
-                  invoices={invoices}
+                  tasks={tasks}
                   approvals={approvals}
                   activityLogs={activityLogs}
+                  users={users}
                   onNavigateTab={(tab) => setActiveTab(tab)}
                   onSelectWorkOrder={(wo) => {
                     setSelectedWoFromDashboard(wo);
@@ -767,34 +739,43 @@ export default function Home() {
               )}
 
               {activeTab === 'public_form' && (
-                <PublicFormView
-                  workOrders={workOrders}
-                  documents={documents}
-                  userRole={currentUser.role}
-                />
+                <PublicFormView />
               )}
 
               {activeTab === 'whatsapp' && (
                 <WhatsAppHubView
-                  messages={waMessages}
-                  onSendMessage={handleSendWaMessage}
+                  workOrders={scopeWorkOrders(workOrders, currentUser)}
+                  messages={whatsappMessages}
+                  onSendMessage={handleSendWhatsappMessage}
+                  currentUser={currentUser}
                 />
               )}
 
               {activeTab === 'ai' && (
                 <AIFeaturesView
-                  documents={documents}
                   workOrders={workOrders}
+                  documents={documents}
+                  onApplyOcrData={handleApplyOcrData}
+                />
+              )}
+
+              {activeTab === 'client_portal' && (
+                <ClientMobilePortalView
+                  workOrders={workOrders}
+                  documents={documents}
+                  clientName={currentUser.name}
+                  onUploadDoc={handleUploadDocument}
+                  onNavigateTab={(tab) => setActiveTab(tab)}
                 />
               )}
 
               {activeTab === 'notary_tasks' && (
                 <NotaryPortalView
                   workOrders={workOrders}
-                  documents={documents}
-                  currentUser={currentUser}
+                  tasks={tasks}
+                  notaryName={currentUser.name}
                   onUploadDocument={handleUploadDocument}
-                  onAdvanceWorkflowStage={handleAdvanceWorkflowStage}
+                  onNavigateTab={(tab) => setActiveTab(tab)}
                 />
               )}
             </>

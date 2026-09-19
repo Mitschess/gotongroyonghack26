@@ -520,30 +520,36 @@ export default function WorkOrdersView({
                 {/* TAB 1: WORKFLOW ENGINE TRACKER */}
                 {activeWoTab === 'workflow' && (
                   <div className="space-y-6">
-                    {/* Status Change Control */}
-                    <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
-                        Ubah Status Work Order:
-                      </label>
-                      <div className="flex flex-wrap gap-2">
-                        {(['To Do', 'In Progress', 'Review', 'Completed'] as WorkOrderStatus[]).map((st) => (
-                          <button
-                            key={st}
-                            onClick={() => {
-                              onUpdateWorkOrderStatus(selectedWo.id, st);
-                              setSelectedWo({ ...selectedWo, status: st });
-                            }}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                              selectedWo.status === st
-                                ? 'bg-indigo-600 text-white shadow-sm'
-                                : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
-                            }`}
-                          >
-                            {st}
-                          </button>
-                        ))}
+                    {/* Status Change Control — Internal Staff & Notary only */}
+                    {userRole !== 'client' ? (
+                      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                          Ubah Status Work Order:
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {(['To Do', 'In Progress', 'Review', 'Completed'] as WorkOrderStatus[]).map((st) => (
+                            <button
+                              key={st}
+                              onClick={() => {
+                                onUpdateWorkOrderStatus(selectedWo.id, st);
+                                setSelectedWo({ ...selectedWo, status: st });
+                              }}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                selectedWo.status === st
+                                  ? 'bg-indigo-600 text-white shadow-sm'
+                                  : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
+                              }`}
+                            >
+                              {st}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-3 text-xs text-indigo-900 font-medium">
+                        ⓘ Progres & tahapan legalitas pengerjaan dikelola secara transparan oleh Tim Legal LexiFlow & Notaris Mitra.
+                      </div>
+                    )}
 
                     {/* Interactive Visual Stage Tracker (FR-16) */}
                     <div>
@@ -587,41 +593,43 @@ export default function WorkOrdersView({
                         })}
                       </div>
 
-                      {/* Advance Stage Button & Request Approval Button */}
-                      <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                        <button
-                          onClick={() => {
-                            onAdvanceWorkflowStage(selectedWo.id);
-                            // Refresh local view
-                            const nextStageIndex = Math.min(selectedWo.currentStageIndex + 1, selectedWo.workflow.length - 1);
-                            const updatedWf = [...selectedWo.workflow];
-                            if (updatedWf[selectedWo.currentStageIndex]) {
-                              updatedWf[selectedWo.currentStageIndex].status = 'Completed';
-                              updatedWf[selectedWo.currentStageIndex].completedAt = '2026-09-19';
-                              updatedWf[selectedWo.currentStageIndex].completedBy = 'Current User';
-                            }
-                            if (updatedWf[nextStageIndex]) {
-                              updatedWf[nextStageIndex].status = 'In Progress';
-                            }
-                            setSelectedWo({
-                              ...selectedWo,
-                              currentStageIndex: nextStageIndex,
-                              workflow: updatedWf,
-                              progressPercent: Math.round(((nextStageIndex + 1) / updatedWf.length) * 100)
-                            });
-                          }}
-                          className="flex-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 py-2.5 text-xs font-bold text-white shadow-sm transition-all"
-                        >
-                          Lanjutkan Tahap Berikutnya →
-                        </button>
+                      {/* Advance Stage Button & Request Approval Button — Internal Staff only */}
+                      {userRole !== 'client' && (
+                        <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                          <button
+                            onClick={() => {
+                              onAdvanceWorkflowStage(selectedWo.id);
+                              // Refresh local view
+                              const nextStageIndex = Math.min(selectedWo.currentStageIndex + 1, selectedWo.workflow.length - 1);
+                              const updatedWf = [...selectedWo.workflow];
+                              if (updatedWf[selectedWo.currentStageIndex]) {
+                                updatedWf[selectedWo.currentStageIndex].status = 'Completed';
+                                updatedWf[selectedWo.currentStageIndex].completedAt = '2026-09-19';
+                                updatedWf[selectedWo.currentStageIndex].completedBy = 'Current User';
+                              }
+                              if (updatedWf[nextStageIndex]) {
+                                updatedWf[nextStageIndex].status = 'In Progress';
+                              }
+                              setSelectedWo({
+                                ...selectedWo,
+                                currentStageIndex: nextStageIndex,
+                                workflow: updatedWf,
+                                progressPercent: Math.round(((nextStageIndex + 1) / updatedWf.length) * 100)
+                              });
+                            }}
+                            className="flex-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 py-2.5 text-xs font-bold text-white shadow-sm transition-all cursor-pointer"
+                          >
+                            Lanjutkan Tahap Berikutnya →
+                          </button>
 
-                        <button
-                          onClick={() => onRequestApproval(selectedWo.id, 'Stage Completion')}
-                          className="rounded-xl border border-amber-500 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 py-2.5 px-4 text-xs font-bold transition-all"
-                        >
-                          Minta Approval Manager
-                        </button>
-                      </div>
+                          <button
+                            onClick={() => onRequestApproval(selectedWo.id, 'Stage Completion')}
+                            className="rounded-xl border border-amber-500 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 py-2.5 px-4 text-xs font-bold transition-all cursor-pointer"
+                          >
+                            Minta Approval Staff / Notaris (Review)
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

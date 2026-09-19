@@ -43,7 +43,6 @@ export default function MobileNav({
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'workorders', label: 'Work Order', icon: FolderKanban },
     { id: 'whatsapp', label: 'WA Proxy', icon: MessageSquare },
-    { id: 'ai', label: 'AI Suite', icon: Sparkles },
   ];
 
   const moreMenuItems = [
@@ -51,9 +50,7 @@ export default function MobileNav({
     { id: 'workorders', label: 'Work Orders', icon: FolderKanban },
     { id: 'clients', label: 'Klien & Perusahaan', icon: Users },
     { id: 'services', label: 'Layanan Legalitas', icon: BookOpen },
-    { id: 'documents', label: 'Dokumen Legal', icon: FileText },
     { id: 'approvals', label: 'Persetujuan', icon: CheckSquare, badge: pendingApprovalsCount },
-    { id: 'calendar', label: 'Kalender Deadline', icon: Calendar },
     { id: 'finance', label: 'Keuangan & Invoice', icon: CreditCard },
     { id: 'reports', label: 'Laporan', icon: BarChart3 },
     { id: 'audit', label: 'Audit Trail', icon: ShieldAlert },

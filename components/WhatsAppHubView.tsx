@@ -12,40 +12,45 @@ import {
   Smartphone,
   RefreshCw,
   Sparkles,
-  User,
+  User as UserIcon,
   Info
 } from 'lucide-react';
-import { WorkOrder, WhatsAppMessage } from '../types/legal';
+import { WorkOrder, WhatsAppMessage, User as UserType, UserRole } from '../types/legal';
 
 interface WhatsAppHubViewProps {
   workOrders: WorkOrder[];
   messages: WhatsAppMessage[];
   onSendMessage: (msg: Partial<WhatsAppMessage>) => void;
+  currentUser?: UserType;
 }
 
 export default function WhatsAppHubView({
   workOrders,
   messages,
-  onSendMessage
+  onSendMessage,
+  currentUser
 }: WhatsAppHubViewProps) {
+  const isClient = currentUser?.role === 'client';
   const [selectedWoId, setSelectedWoId] = useState<string>(workOrders[0]?.id || 'wo-101');
-  const [senderRole, setSenderRole] = useState<'Client' | 'Notary' | 'Platform'>('Client');
+  const [senderRole, setSenderRole] = useState<'Client' | 'Notary' | 'Platform'>(isClient ? 'Client' : 'Client');
   const [inputText, setInputText] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState('');
 
   const currentWo = workOrders.find(w => w.id === selectedWoId) || workOrders[0];
   const woMessages = messages.filter(m => m.workOrderId === selectedWoId);
 
+  const activeSenderRole = isClient ? 'Client' : senderRole;
+
   const handleSend = () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || !currentWo) return;
 
     const newMsg: Partial<WhatsAppMessage> = {
       workOrderId: currentWo.id,
       workOrderNumber: currentWo.woNumber,
-      senderRole,
-      senderName: senderRole === 'Client' ? currentWo.clientName : senderRole === 'Notary' ? (currentWo.notaryName || 'Notaris Rekan') : 'LexiFlow Proxy Bot',
-      maskedPhone: senderRole === 'Client' ? '0812-****-5432' : senderRole === 'Notary' ? '0815-****-1122' : '0811-0000-PROXY',
-      recipientRole: senderRole === 'Client' ? 'Notary' : 'Client',
+      senderRole: activeSenderRole,
+      senderName: activeSenderRole === 'Client' ? (currentUser?.name || currentWo.clientName) : activeSenderRole === 'Notary' ? (currentWo.notaryName || 'Notaris Rekan') : 'LexiFlow Proxy Bot',
+      maskedPhone: activeSenderRole === 'Client' ? '0812-****-5432' : activeSenderRole === 'Notary' ? '0815-****-1122' : '0811-0000-PROXY',
+      recipientRole: activeSenderRole === 'Client' ? 'Admin' : 'Client',
       messageText: inputText,
       timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
       resolutionMethod: inputText.includes(currentWo.woNumber) ? 'EXPLICIT_CODE' : 'REPLY_CONTEXT',
@@ -87,7 +92,7 @@ export default function WhatsAppHubView({
         {/* Proxy Model Banner */}
         <div className="mt-4 rounded-xl bg-slate-950/60 p-3 border border-emerald-500/20 text-xs text-slate-300 flex items-center justify-between gap-2 overflow-x-auto">
           <div className="flex items-center gap-2 shrink-0">
-            <User className="h-4 w-4 text-emerald-400" /> KLIEN
+            <UserIcon className="h-4 w-4 text-emerald-400" /> KLIEN
           </div>
           <span className="text-slate-500">↔ (Relay Proxy) ↔</span>
           <div className="flex items-center gap-2 shrink-0">
@@ -158,32 +163,41 @@ export default function WhatsAppHubView({
         {/* Right Column: Interactive Chat Proxy Simulator */}
         <div className="lg:col-span-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-[520px] shadow-sm overflow-hidden">
           {/* Chat Header */}
-          <div className="p-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex items-center justify-between">
+          <div className="p-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex flex-wrap items-center justify-between gap-2">
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">{currentWo.woNumber}</span>
-                <span className="px-2 py-0.5 text-[10px] font-extrabold rounded bg-emerald-500/20 text-emerald-400">PROXIED</span>
+                <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">{currentWo?.woNumber}</span>
+                <span className="px-2 py-0.5 text-[10px] font-extrabold rounded bg-emerald-500/20 text-emerald-400">PROXIED WA</span>
               </div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">{currentWo.clientName}</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">{currentWo?.clientName}</h3>
             </div>
 
-            {/* Sender Switcher */}
-            <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
-              <span className="text-[10px] text-slate-400 font-bold px-1 hidden sm:inline">Simulasi Pengirim:</span>
-              {(['Client', 'Notary', 'Platform'] as const).map((role) => (
-                <button
-                  key={role}
-                  onClick={() => setSenderRole(role)}
-                  className={`px-2.5 py-1 rounded-lg font-bold transition-all text-xs ${
-                    senderRole === role
-                      ? 'bg-emerald-600 text-white shadow'
-                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-100'
-                  }`}
-                >
-                  {role}
-                </button>
-              ))}
-            </div>
+            {/* Recipient / Sender Info */}
+            {isClient ? (
+              <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-3 py-1.5 text-xs">
+                <span className="text-[10px] text-slate-400 font-bold uppercase block">Penerima Chat (Admin Legal)</span>
+                <span className="font-black text-emerald-800 dark:text-emerald-300">
+                  PIC: {currentWo?.picStaffName || 'Tim Legal Platform'}
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
+                <span className="text-[10px] text-slate-400 font-bold px-1 hidden sm:inline">Simulasi Pengirim:</span>
+                {(['Client', 'Notary', 'Platform'] as const).map((role) => (
+                  <button
+                    key={role}
+                    onClick={() => setSenderRole(role)}
+                    className={`px-2.5 py-1 rounded-lg font-bold transition-all text-xs cursor-pointer ${
+                      senderRole === role
+                        ? 'bg-emerald-600 text-white shadow'
+                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-100'
+                    }`}
+                  >
+                    {role}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Chat Messages Feed */}

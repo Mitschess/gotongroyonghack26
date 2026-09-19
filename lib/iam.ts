@@ -9,15 +9,13 @@ export interface MenuItemPermission {
 // Master IAM Access Matrix across all LexiFlow tabs
 export const IAM_TAB_PERMISSIONS: Record<string, UserRole[]> = {
   todays_actions: ['super_admin', 'admin', 'technical'],
-  public_form:    ['super_admin', 'admin', 'technical', 'finance', 'notary'],
-  whatsapp:       ['super_admin', 'admin', 'technical', 'finance', 'notary'],
-  ai:             ['super_admin', 'admin', 'technical'],
-  notary_tasks:   ['super_admin', 'admin', 'notary'],
+  public_form:    ['notary'],
+  whatsapp:       ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'],
+  notary_tasks:   ['notary'],
   dashboard:      ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'],
   workorders:     ['super_admin', 'admin', 'technical', 'client', 'notary'],
   clients:        ['super_admin', 'admin', 'technical', 'finance'],
   services:       ['super_admin', 'admin', 'technical', 'client'],
-  documents:      ['super_admin', 'admin', 'technical', 'client', 'notary'],
   approvals:      ['super_admin', 'admin', 'technical'],
   calendar:       ['super_admin', 'admin', 'technical'],
   finance:        ['super_admin', 'admin', 'finance'],
