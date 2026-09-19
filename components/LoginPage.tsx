@@ -225,7 +225,10 @@ export default function LoginPage({ users, onLogin }: LoginPageProps) {
             </button>
 
             {showRoleDropdown && (
-              <div ref={dropdownRef} className="absolute z-10 bottom-full left-0 right-0 mb-1.5 rounded-xl border border-slate-200 bg-white shadow-xl py-1 animate-in fade-in-0 zoom-in-95 duration-150">
+              <div 
+                ref={dropdownRef} 
+                className="absolute z-50 top-full left-0 right-0 mt-1.5 max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-2xl py-1 animate-in fade-in-0 zoom-in-95 duration-150"
+              >
                 {users.map((u) => {
                   const meta = ROLE_META[u.role];
                   const isThisLoading = loadingUserId === u.id;
