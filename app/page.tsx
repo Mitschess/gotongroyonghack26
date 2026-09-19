@@ -19,6 +19,7 @@ import AIFeaturesView from '../components/AIFeaturesView';
 import ClientMobilePortalView from '../components/ClientMobilePortalView';
 import NotaryPortalView from '../components/NotaryPortalView';
 import MobileNav from '../components/MobileNav';
+import LoginPage from '../components/LoginPage';
 
 import { 
   INITIAL_USERS, 
@@ -57,6 +58,7 @@ import {
 } from '../types/legal';
 
 export default function Home() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<User>(INITIAL_USERS[1]); // Maya Putri, S.H. (Manager)
   const [users] = useState<User[]>(INITIAL_USERS);
   
@@ -438,8 +440,21 @@ export default function Home() {
 
   const pendingApprovalsCount = approvals.filter(a => a.status === 'Pending').length;
 
+  if (!isAuthenticated) {
+    return (
+      <LoginPage 
+        users={users} 
+        onLogin={(user) => {
+          setCurrentUser(user);
+          setIsAuthenticated(true);
+          logActivity('User Login', `Berhasil masuk sebagai ${user.name} (${user.role})`);
+        }} 
+      />
+    );
+  }
+
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 antialiased">
+    <div className="flex h-screen w-full overflow-hidden bg-slate-50 font-sans text-slate-900 antialiased">
       {/* Sidebar Navigation (Desktop Wide Screens) */}
       <Sidebar
         activeTab={activeTab}
@@ -462,6 +477,7 @@ export default function Home() {
           searchQuery={globalSearch}
           setSearchQuery={setGlobalSearch}
           activeTab={activeTab}
+          onLogout={() => setIsAuthenticated(false)}
         />
 
         {/* Dynamic Views Viewport */}
@@ -484,7 +500,13 @@ export default function Home() {
                 });
               }}
               onOpenReview={(woId) => {
-                setActiveTab('approvals');
+                const wo = workOrders.find(w => w.id === woId);
+                if (wo) {
+                  setSelectedWoFromDashboard(wo);
+                  setActiveTab('workorders');
+                } else {
+                  setActiveTab('approvals');
+                }
               }}
             />
           )}
@@ -551,6 +573,8 @@ export default function Home() {
               workNotes={workNotes}
               userRole={currentUser.role}
               currentUserId={currentUser.id}
+              selectedWorkOrder={selectedWoFromDashboard}
+              onClearSelectedWorkOrder={() => setSelectedWoFromDashboard(null)}
               onAddWorkOrder={handleAddWorkOrder}
               onUpdateWorkOrderStatus={handleUpdateWorkOrderStatus}
               onAdvanceWorkflowStage={handleAdvanceWorkflowStage}

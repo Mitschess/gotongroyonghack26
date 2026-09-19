@@ -46,6 +46,8 @@ interface WorkOrdersViewProps {
   workNotes: WorkNote[];
   userRole: UserRole;
   currentUserId: string;
+  selectedWorkOrder?: WorkOrder | null;
+  onClearSelectedWorkOrder?: () => void;
   onAddWorkOrder: (newWo: Partial<WorkOrder>) => void;
   onUpdateWorkOrderStatus: (woId: string, status: WorkOrderStatus) => void;
   onAdvanceWorkflowStage: (woId: string) => void;
@@ -64,6 +66,8 @@ export default function WorkOrdersView({
   workNotes,
   userRole,
   currentUserId,
+  selectedWorkOrder,
+  onClearSelectedWorkOrder,
   onAddWorkOrder,
   onUpdateWorkOrderStatus,
   onAdvanceWorkflowStage,
@@ -78,8 +82,15 @@ export default function WorkOrdersView({
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   
   // Selected Work Order Drawer State
-  const [selectedWo, setSelectedWo] = useState<WorkOrder | null>(null);
+  const [selectedWo, setSelectedWo] = useState<WorkOrder | null>(selectedWorkOrder || null);
   const [activeWoTab, setActiveWoTab] = useState<'workflow' | 'tasks' | 'documents' | 'notes'>('workflow');
+
+  React.useEffect(() => {
+    if (selectedWorkOrder) {
+      setSelectedWo(selectedWorkOrder);
+    }
+  }, [selectedWorkOrder]);
+
   
   // Modal for new Work Order
   const [showAddModal, setShowAddModal] = useState(false);
@@ -187,10 +198,10 @@ export default function WorkOrdersView({
   };
 
   const statusColumns: { status: WorkOrderStatus; title: string; color: string }[] = [
-    { status: 'To Do', title: 'To Do / Antrean', color: 'border-slate-500 text-slate-400' },
-    { status: 'In Progress', title: 'Dalam Proses', color: 'border-blue-500 text-blue-500' },
-    { status: 'Review', title: 'Review Manager', color: 'border-amber-500 text-amber-500' },
-    { status: 'Completed', title: 'Selesai', color: 'border-emerald-500 text-emerald-500' },
+    { status: 'To Do', title: 'TO DO / ANTREAN', color: '#3B82F6' },
+    { status: 'In Progress', title: 'DALAM PROSES', color: '#4F46E5' },
+    { status: 'Review', title: 'REVIEW MANAGER', color: '#D97706' },
+    { status: 'Completed', title: 'SELESAI', color: '#059669' },
   ];
 
   return (
@@ -198,31 +209,31 @@ export default function WorkOrdersView({
       {/* Header Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Kanban className="h-5 w-5 text-indigo-500" /> Manajemen Work Order & Task Legal
+          <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+            <Kanban className="h-5 w-5 text-indigo-600" /> Manajemen Work Order & Task Legal
           </h2>
           <p className="text-xs text-slate-500">Kelola berkas pekerjaan, penugasan staff, dan workflow perizinan</p>
         </div>
 
         <div className="flex items-center gap-3">
           {/* View Mode Toggle */}
-          <div className="flex items-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1">
+          <div className="flex items-center rounded-xl p-1 bg-white border border-slate-200">
             <button
               onClick={() => setViewMode('board')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
                 viewMode === 'board'
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-100'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <Kanban className="h-3.5 w-3.5" /> Board
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
                 viewMode === 'list'
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-100'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <List className="h-3.5 w-3.5" /> Tabel List
@@ -231,7 +242,7 @@ export default function WorkOrdersView({
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-xs font-bold text-white shadow-md transition-all"
+            className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-xs"
           >
             <Plus className="h-4 w-4" /> Work Order Baru
           </button>
@@ -239,25 +250,25 @@ export default function WorkOrdersView({
       </div>
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-sm">
-        <div className="flex items-center gap-2 flex-1 min-w-[240px]">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl p-3 bg-white border border-slate-200 shadow-xs">
+        <div className="flex items-center gap-2 flex-1 min-w-[240px] px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200">
           <Search className="h-4 w-4 text-slate-400" />
           <input
             type="text"
             placeholder="Cari nomor WO, nama client, atau jenis layanan..."
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
-            className="w-full bg-transparent text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none"
+            className="w-full bg-transparent text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none"
           />
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 text-xs text-slate-500">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
             <Filter className="h-3.5 w-3.5" /> Status:
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-2 py-1 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none"
+              className="rounded-xl px-2.5 py-1 text-xs font-bold text-slate-900 bg-slate-50 border border-slate-200 focus:outline-none"
             >
               <option value="all">Semua Status</option>
               <option value="To Do">To Do</option>
@@ -267,12 +278,12 @@ export default function WorkOrdersView({
             </select>
           </div>
 
-          <div className="flex items-center gap-1 text-xs text-slate-500">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
             Priority:
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-2 py-1 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none"
+              className="rounded-xl px-2.5 py-1 text-xs font-bold text-slate-900 bg-slate-50 border border-slate-200 focus:outline-none"
             >
               <option value="all">Semua Prioritas</option>
               <option value="Urgent">Urgent</option>
@@ -290,12 +301,16 @@ export default function WorkOrdersView({
           {statusColumns.map((col) => {
             const colWorkOrders = filteredWorkOrders.filter(wo => wo.status === col.status);
             return (
-              <div key={col.status} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-3 flex flex-col min-h-[500px]">
-                <div className={`flex items-center justify-between pb-3 border-b-2 ${col.color}`}>
-                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 dark:text-slate-100">
+              <div 
+                key={col.status} 
+                className="rounded-2xl p-3 flex flex-col min-h-[500px] bg-slate-100/70 border border-slate-200/80"
+              >
+                <div className="flex items-center justify-between pb-3" style={{ borderBottom: `2px solid ${col.color}` }}>
+                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full" style={{ background: col.color }} />
                     {col.title}
                   </h3>
-                  <span className="rounded-full bg-slate-200 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:text-slate-300">
+                  <span className="rounded-full px-2 py-0.5 text-[10px] font-extrabold text-white" style={{ background: col.color }}>
                     {colWorkOrders.length}
                   </span>
                 </div>
@@ -305,41 +320,43 @@ export default function WorkOrdersView({
                     <div
                       key={wo.id}
                       onClick={() => setSelectedWo(wo)}
-                      className="cursor-pointer rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm hover:shadow-md transition-all hover:border-indigo-500/50 group"
+                      className="cursor-pointer rounded-xl p-4 bg-white border border-slate-200 shadow-xs hover:shadow-md transition-all group hover:border-indigo-300"
                     >
-                      <div className="flex items-center justify-between text-[10px] font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                        <span>{wo.woNumber}</span>
-                        <span className={`px-2 py-0.5 rounded ${
-                          wo.priority === 'Urgent' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/30' :
-                          wo.priority === 'High' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30' :
-                          'bg-slate-500/10 text-slate-400'
-                        }`}>
+                      <div className="flex items-center justify-between text-[10px] font-mono font-bold">
+                        <span className="text-indigo-600">{wo.woNumber}</span>
+                        <span 
+                          className={`px-2 py-0.5 rounded font-black text-[9px] ${
+                            wo.priority === 'Urgent' ? 'bg-rose-50 text-rose-600 border border-rose-200' :
+                            wo.priority === 'High' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                            'bg-blue-50 text-blue-600 border border-blue-200'
+                          }`}
+                        >
                           {wo.priority}
                         </span>
                       </div>
 
-                      <h4 className="mt-2 text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 transition-colors">
+                      <h4 className="mt-2 text-sm font-extrabold text-slate-900 group-hover:text-indigo-600 transition-colors">
                         {wo.clientName}
                       </h4>
                       <p className="text-xs text-slate-500 line-clamp-1">{wo.serviceName}</p>
 
                       {/* Progress Bar */}
                       <div className="mt-3 space-y-1">
-                        <div className="flex items-center justify-between text-[10px] text-slate-500">
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 font-bold">
                           <span>Tahap {wo.currentStageIndex + 1}/{wo.workflow.length}</span>
-                          <span className="font-bold text-slate-900 dark:text-slate-100">{wo.progressPercent}%</span>
+                          <span className="font-bold text-slate-900">{wo.progressPercent}%</span>
                         </div>
-                        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div className="w-full rounded-full h-1.5 overflow-hidden bg-slate-100">
                           <div
-                            className="bg-indigo-600 h-full rounded-full transition-all"
+                            className="h-full rounded-full transition-all bg-indigo-600"
                             style={{ width: `${wo.progressPercent}%` }}
                           />
                         </div>
                       </div>
 
-                      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-                        <span className="flex items-center gap-1 text-slate-600 dark:text-slate-300 font-medium">
-                          <User className="h-3 w-3 text-indigo-500" /> {wo.picStaffName.split(' ')[0]}
+                      <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                        <span className="flex items-center gap-1 font-semibold text-slate-700">
+                          <User className="h-3 w-3 text-indigo-600" /> {wo.picStaffName.split(' ')[0]}
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" /> {wo.deadline}
@@ -354,10 +371,10 @@ export default function WorkOrdersView({
         </div>
       ) : (
         /* Table View */
-        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
+        <div className="rounded-2xl overflow-hidden shadow-xs bg-white border border-slate-200">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-950 text-slate-500 uppercase font-bold border-b border-slate-200 dark:border-slate-800">
+              <thead className="uppercase font-extrabold text-[11px] bg-slate-50 text-slate-500 border-b border-slate-200">
                 <tr>
                   <th className="py-3.5 px-4">WO Number</th>
                   <th className="py-3.5 px-4">Klien / Perusahaan</th>
@@ -370,36 +387,37 @@ export default function WorkOrdersView({
                   <th className="py-3.5 px-4 text-right">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+              <tbody className="divide-y divide-slate-100 text-slate-800">
                 {filteredWorkOrders.map((wo) => (
-                  <tr key={wo.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">{wo.woNumber}</td>
-                    <td className="py-3 px-4 font-bold text-slate-900 dark:text-slate-100">{wo.clientName}</td>
-                    <td className="py-3 px-4">{wo.serviceName}</td>
+                  <tr key={wo.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-indigo-600">{wo.woNumber}</td>
+                    <td className="py-3 px-4 font-extrabold text-slate-900">{wo.clientName}</td>
+                    <td className="py-3 px-4 text-slate-600">{wo.serviceName}</td>
                     <td className="py-3 px-4">{wo.picStaffName}</td>
                     <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 rounded font-bold text-[10px] bg-indigo-500/10 text-indigo-500">
+                      <span className="px-2 py-0.5 rounded font-bold text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-100">
                         {wo.priority}
                       </span>
                     </td>
-                    <td className="py-3 px-4 font-mono">{wo.deadline}</td>
+                    <td className="py-3 px-4 font-mono text-slate-500">{wo.deadline}</td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
-                        <div className="w-16 bg-slate-100 dark:bg-slate-800 rounded-full h-1.5">
-                          <div className="bg-indigo-600 h-1.5 rounded-full" style={{ width: `${wo.progressPercent}%` }} />
+                        <div className="w-16 rounded-full h-1.5 bg-slate-100">
+                          <div className="h-1.5 rounded-full bg-indigo-600" style={{ width: `${wo.progressPercent}%` }} />
                         </div>
                         <span className="font-bold">{wo.progressPercent}%</span>
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+                      <span className="badge-pill status-progress text-[10px]">
                         {wo.status}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right">
                       <button
                         onClick={() => setSelectedWo(wo)}
-                        className="rounded-lg bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-colors"
+                        className="rounded-lg px-2.5 py-1 text-xs font-bold transition-all text-white"
+                        style={{ background: '#252535', border: '1px solid #2E2E45' }}
                       >
                         Detail Drawer
                       </button>

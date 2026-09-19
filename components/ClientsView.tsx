@@ -85,39 +85,39 @@ export default function ClientsView({
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-indigo-500" /> Manajemen Klien & Profil Perusahaan
+          <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-indigo-600" /> Manajemen Klien & Profil Perusahaan
           </h2>
           <p className="text-xs text-slate-500">Database terpusat klien PT, CV, PMA, dan perorangan</p>
         </div>
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-xs font-bold text-white shadow-md transition-all self-start sm:self-auto"
+          className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-xs font-bold text-white shadow-xs transition-all self-start sm:self-auto"
         >
           <Plus className="h-4 w-4" /> Registrasi Klien Baru
         </button>
       </div>
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-sm">
-        <div className="flex items-center gap-2 flex-1 min-w-[240px]">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-xs">
+        <div className="flex items-center gap-2 flex-1 min-w-[240px] px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200">
           <Search className="h-4 w-4 text-slate-400" />
           <input
             type="text"
             placeholder="Cari nama klien, ID, email, atau nama PIC..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none"
+            className="w-full bg-transparent text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none"
           />
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-slate-500">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
           <Filter className="h-3.5 w-3.5" /> Jenis Klien:
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-2 py-1 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none"
+            className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none"
           >
             <option value="all">Semua Tipe</option>
             <option value="PT">PT (Perseroan Terbatas)</option>
@@ -138,23 +138,23 @@ export default function ClientsView({
             <div
               key={client.id}
               onClick={() => setSelectedClient(client)}
-              className="cursor-pointer rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm hover:shadow-md transition-all hover:border-indigo-500/40 flex flex-col justify-between"
+              className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:shadow-md transition-all hover:border-indigo-300 flex flex-col justify-between group"
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">{client.clientCode}</span>
-                  <span className="rounded-md bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400">
+                  <span className="font-mono text-xs font-bold text-indigo-600">{client.clientCode}</span>
+                  <span className="rounded-md bg-indigo-50 px-2 py-0.5 text-[10px] font-extrabold text-indigo-700 border border-indigo-100">
                     {client.type}
                   </span>
                 </div>
 
-                <h3 className="mt-3 text-base font-extrabold text-slate-900 dark:text-slate-100 hover:text-indigo-600 transition-colors">
+                <h3 className="mt-3 text-base font-extrabold text-slate-900 group-hover:text-indigo-600 transition-colors">
                   {client.name}
                 </h3>
 
                 <div className="mt-3 space-y-1.5 text-xs text-slate-500">
                   <p className="flex items-center gap-2">
-                    <User className="h-3.5 w-3.5 text-indigo-500" /> PIC: <strong className="text-slate-800 dark:text-slate-200">{client.picName}</strong> ({client.picPhone})
+                    <User className="h-3.5 w-3.5 text-indigo-600" /> PIC: <strong className="text-slate-800">{client.picName}</strong> ({client.picPhone})
                   </p>
                   <p className="flex items-center gap-2">
                     <Mail className="h-3.5 w-3.5 text-slate-400" /> {client.email}
@@ -165,9 +165,9 @@ export default function ClientsView({
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
-                <span className="flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300">
-                  <FolderKanban className="h-3.5 w-3.5 text-indigo-500" /> {clientWoList.length} Project Active
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <span className="flex items-center gap-1 font-semibold text-slate-700">
+                  <FolderKanban className="h-3.5 w-3.5 text-indigo-600" /> {clientWoList.length} Project Active
                 </span>
                 <span className="flex items-center gap-1 text-slate-400">
                   <FileText className="h-3.5 w-3.5" /> {clientDocList.length} Dokumen

@@ -59,14 +59,18 @@ export default function TodaysActionsView({
   return (
     <div className="space-y-4 pb-16 md:pb-6">
       {/* Top Banner - Action First */}
-      <div className="rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-4 md:p-6 text-white shadow-lg border border-indigo-500/30">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div 
+        className="rounded-2xl p-5 md:p-6 bg-white border border-slate-200 shadow-xs relative overflow-hidden"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold mb-2">
-              <Zap className="h-3.5 w-3.5" /> Gotong Royong Engine: Action-First
+            <div 
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold mb-2 bg-indigo-50 text-indigo-700 border border-indigo-100"
+            >
+              <Zap className="h-3.5 w-3.5 text-indigo-600" /> Action-First Engine
             </div>
-            <h2 className="text-xl md:text-2xl font-black tracking-tight">Today&apos;s Actions (Tindakan Hari Ini)</h2>
-            <p className="text-xs md:text-sm text-slate-300 mt-1">
+            <h2 className="text-xl md:text-2xl font-black tracking-tight text-slate-900">Today&apos;s Actions (Tindakan Hari Ini)</h2>
+            <p className="text-xs md:text-sm mt-1 text-slate-500">
               Sabtu, 19 Sep 2026 — Daftar tugas berurutan prioritas langsung dengan tombol aksi 1-klik.
             </p>
           </div>
@@ -74,7 +78,7 @@ export default function TodaysActionsView({
           <div className="flex items-center gap-2">
             <button
               onClick={() => onNavigateTab('whatsapp')}
-              className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-emerald-600/30"
+              className="px-4 py-2 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 transition-all shrink-0 shadow-xs"
             >
               <MessageSquare className="h-4 w-4" /> WA Proxy Hub
             </button>
@@ -82,29 +86,29 @@ export default function TodaysActionsView({
         </div>
 
         {/* Action Counters Bar */}
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-4 border-t border-slate-800">
-          <div className="rounded-xl bg-slate-800/80 p-2.5 border border-slate-700">
-            <span className="text-[11px] font-semibold text-amber-400">Client Follow-up</span>
-            <p className="text-lg font-black text-white mt-0.5">{clientFollowups.length} Project</p>
+        <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-100">
+          <div className="rounded-xl p-3 bg-slate-50 border border-slate-200/80">
+            <span className="text-xs font-bold text-amber-700">Client Follow-up</span>
+            <p className="text-xl font-black text-slate-900 mt-0.5">{clientFollowups.length} Project</p>
           </div>
-          <div className="rounded-xl bg-slate-800/80 p-2.5 border border-slate-700">
-            <span className="text-[11px] font-semibold text-rose-400">Notary Terlambat</span>
-            <p className="text-lg font-black text-white mt-0.5">{notaryDelays.length} Project</p>
+          <div className="rounded-xl p-3 bg-slate-50 border border-slate-200/80">
+            <span className="text-xs font-bold text-rose-700">Notary Terlambat</span>
+            <p className="text-xl font-black text-slate-900 mt-0.5">{notaryDelays.length} Project</p>
           </div>
-          <div className="rounded-xl bg-slate-800/80 p-2.5 border border-slate-700">
-            <span className="text-[11px] font-semibold text-blue-400">Menunggu Review</span>
-            <p className="text-lg font-black text-white mt-0.5">{pendingReviews.length} Dokumen</p>
+          <div className="rounded-xl p-3 bg-slate-50 border border-slate-200/80">
+            <span className="text-xs font-bold text-indigo-700">Menunggu Review</span>
+            <p className="text-xl font-black text-slate-900 mt-0.5">{pendingReviews.length} Dokumen</p>
           </div>
-          <div className="rounded-xl bg-slate-800/80 p-2.5 border border-slate-700">
-            <span className="text-[11px] font-semibold text-purple-400">Project Critical</span>
-            <p className="text-lg font-black text-white mt-0.5">{criticalProjects.length} Risk High</p>
+          <div className="rounded-xl p-3 bg-slate-50 border border-slate-200/80">
+            <span className="text-xs font-bold text-purple-700">Project Critical</span>
+            <p className="text-xl font-black text-slate-900 mt-0.5">{criticalProjects.length} Risk High</p>
           </div>
         </div>
       </div>
 
       {/* Filter Selector Pills */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-        <span className="text-xs font-bold text-slate-500 flex items-center gap-1 shrink-0">
+        <span className="text-xs font-bold flex items-center gap-1 shrink-0 text-slate-400">
           <Filter className="h-3.5 w-3.5" /> Filter:
         </span>
         {[
@@ -118,8 +122,8 @@ export default function TodaysActionsView({
             onClick={() => setFilterRole(item.key as any)}
             className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
               filterRole === item.key
-                ? 'bg-indigo-600 text-white shadow'
-                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
             }`}
           >
             {item.label}
@@ -130,27 +134,27 @@ export default function TodaysActionsView({
       {/* Priority Actions Card List */}
       <div className="space-y-3">
         {filteredWorkOrders.length === 0 ? (
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 text-center">
-            <CheckCircle className="h-10 w-10 text-emerald-500 mx-auto mb-2" />
-            <h3 className="font-bold text-slate-900 dark:text-slate-100">Semua Tindakan Selesai!</h3>
-            <p className="text-xs text-slate-500 mt-1">Tidak ada item yang membutuhkan follow-up untuk filter ini.</p>
+          <div className="rounded-2xl p-8 text-center bg-white border border-slate-200 shadow-xs">
+            <CheckCircle className="h-10 w-10 mx-auto mb-2 text-emerald-500" />
+            <h3 className="font-bold text-slate-900">Semua Tindakan Selesai!</h3>
+            <p className="text-xs mt-1 text-slate-500">Tidak ada item yang membutuhkan follow-up untuk filter ini.</p>
           </div>
         ) : (
           filteredWorkOrders.map((wo) => {
             const healthBadge = {
-              CRITICAL: 'bg-rose-500/10 text-rose-600 border-rose-500/30',
-              HIGH_RISK: 'bg-orange-500/10 text-orange-600 border-orange-500/30',
-              WARNING: 'bg-amber-500/10 text-amber-600 border-amber-500/30',
-              ON_TRACK: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30'
+              CRITICAL: { bg: '#FEF2F2', text: '#DC2626', border: '#FECACA' },
+              HIGH_RISK: { bg: '#FFFBEB', text: '#D97706', border: '#FDE68A' },
+              WARNING: { bg: '#FFFBEB', text: '#D97706', border: '#FDE68A' },
+              ON_TRACK: { bg: '#ECFDF5', text: '#059669', border: '#A7F3D0' }
             }[wo.health || 'ON_TRACK'];
 
             const blockedBadge = {
-              CLIENT: 'bg-amber-500/10 text-amber-600',
-              NOTARY: 'bg-rose-500/10 text-rose-600',
-              ADMIN: 'bg-blue-500/10 text-blue-600',
-              SYSTEM: 'bg-purple-500/10 text-purple-600',
-              EXTERNAL: 'bg-slate-500/10 text-slate-600',
-              NONE: 'bg-emerald-500/10 text-emerald-600'
+              CLIENT: { bg: '#FFFBEB', text: '#D97706' },
+              NOTARY: { bg: '#FEF2F2', text: '#DC2626' },
+              ADMIN: { bg: '#EFF6FF', text: '#2563EB' },
+              SYSTEM: { bg: '#EEF2FF', text: '#4F46E5' },
+              EXTERNAL: { bg: '#F1F5F9', text: '#475569' },
+              NONE: { bg: '#ECFDF5', text: '#059669' }
             }[wo.blockedOn || 'NONE'];
 
             const isSent = sentReminders[wo.id];
@@ -158,67 +162,68 @@ export default function TodaysActionsView({
             return (
               <div
                 key={wo.id}
-                className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm hover:shadow-md transition-all"
+                className="rounded-2xl p-4 md:p-5 bg-white border border-slate-200 shadow-xs hover:shadow-md transition-all"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">{wo.woNumber}</span>
-                      <span className={`px-2 py-0.5 text-[10px] font-extrabold rounded-md border ${healthBadge}`}>
-                        {wo.health || 'ON_TRACK'}
+                      <span className="font-mono text-xs font-black text-indigo-600">{wo.woNumber}</span>
+                      <span 
+                        className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide"
+                        style={{ background: healthBadge.bg, color: healthBadge.text, border: `1px solid ${healthBadge.border}` }}
+                      >
+                        {wo.health}
                       </span>
-                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md ${blockedBadge}`}>
-                        Blocked on: {wo.blockedOn || 'NONE'}
+                      <span 
+                        className="px-2 py-0.5 rounded text-[10px] font-bold"
+                        style={{ background: blockedBadge.bg, color: blockedBadge.text }}
+                      >
+                        Blocked on: {wo.blockedOn}
                       </span>
                     </div>
 
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">{wo.clientName}</h3>
+                    <h4 className="text-base font-extrabold text-slate-900">{wo.clientName}</h4>
                     <p className="text-xs text-slate-500">{wo.serviceName}</p>
 
-                    <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 pt-1">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-700 pt-1">
                       <Clock className="h-3.5 w-3.5 text-amber-500" />
-                      <span className="font-medium text-amber-600 dark:text-amber-400">
-                        {wo.actionRequired || 'Perlu penanganan staf'}
-                      </span>
+                      <span>Follow up {wo.blockedOn === 'NOTARY' ? 'Notaris Soebagjo untuk upload Minuta Akta Final' : wo.blockedOn === 'CLIENT' ? 'Klien untuk unggah Surat Pernyataan Merek' : 'Dokumen Draf RUPS & persetujuan Manager'}</span>
                     </div>
                   </div>
 
-                  {/* 1-Click Action Buttons */}
-                  <div className="shrink-0 flex items-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
                     {wo.blockedOn === 'NOTARY' && (
                       <button
-                        onClick={() => handleReminder(wo.id, wo.notaryName || 'Notaris', 'Notary')}
-                        disabled={isSent}
-                        className={`w-full sm:w-auto px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                        onClick={() => handleReminder(wo.id, 'Notaris Soebagjo', 'Notary')}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs ${
                           isSent
-                            ? 'bg-emerald-500/20 text-emerald-600 cursor-default'
-                            : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/30'
+                            ? 'bg-slate-100 text-slate-500 border border-slate-200'
+                            : 'bg-emerald-600 hover:bg-emerald-700 text-white'
                         }`}
                       >
                         <Send className="h-3.5 w-3.5" />
-                        {isSent ? 'Reminder Terkirim!' : 'Hubungi Notaris (WA)'}
+                        {isSent ? 'Reminder Terkirim ✓' : 'Hubungi Notaris (WA)'}
                       </button>
                     )}
 
                     {wo.blockedOn === 'CLIENT' && (
                       <button
                         onClick={() => handleReminder(wo.id, wo.clientName, 'Client')}
-                        disabled={isSent}
-                        className={`w-full sm:w-auto px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                        className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs ${
                           isSent
-                            ? 'bg-emerald-500/20 text-emerald-600 cursor-default'
-                            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30'
+                            ? 'bg-slate-100 text-slate-500 border border-slate-200'
+                            : 'bg-indigo-600 hover:bg-indigo-700 text-white'
                         }`}
                       >
                         <Send className="h-3.5 w-3.5" />
-                        {isSent ? 'Reminder Terkirim!' : 'Kirim Reminder Client'}
+                        {isSent ? 'Reminder Terkirim ✓' : 'Kirim Reminder Client'}
                       </button>
                     )}
 
-                    {(wo.blockedOn === 'ADMIN' || wo.status === 'Review') && (
+                    {wo.blockedOn === 'ADMIN' && (
                       <button
                         onClick={() => onOpenReview(wo.id)}
-                        className="w-full sm:w-auto px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-amber-500/20"
+                        className="px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white transition-all shadow-xs"
                       >
                         <FileCheck2 className="h-3.5 w-3.5" />
                         Buka Review
@@ -226,8 +231,8 @@ export default function TodaysActionsView({
                     )}
 
                     <button
-                      onClick={() => onNavigateTab('workorders')}
-                      className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                      onClick={() => onOpenReview(wo.id)}
+                      className="p-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all"
                       title="Lihat Detail Work Order"
                     >
                       <ArrowUpRight className="h-4 w-4" />
