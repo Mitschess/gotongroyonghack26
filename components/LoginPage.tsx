@@ -1,23 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Scale, 
   Lock, 
   Mail, 
   Eye, 
   EyeOff, 
-  ArrowRight, 
-  Sparkles,
-  UserCheck,
-  ShieldCheck,
-  KeyRound,
-  Building2,
-  CheckCircle2,
-  Fingerprint,
-  Globe,
-  Layers,
-  ShieldAlert
+  ArrowRight,
+  ChevronRight,
+  ChevronDown
 } from 'lucide-react';
 import { User, UserRole } from '../types/legal';
 
@@ -26,290 +18,267 @@ interface LoginPageProps {
   onLogin: (user: User) => void;
 }
 
+const ROLE_META: Record<UserRole, { label: string; color: string; dot: string }> = {
+  super_admin: { label: 'Super Admin',    color: 'text-indigo-600',  dot: 'bg-indigo-500' },
+  admin:       { label: 'Legal Manager',  color: 'text-blue-600',    dot: 'bg-blue-500' },
+  technical:   { label: 'Legal Staff',    color: 'text-emerald-600', dot: 'bg-emerald-500' },
+  finance:     { label: 'Finance',        color: 'text-cyan-600',    dot: 'bg-cyan-500' },
+  notary:      { label: 'Notaris',        color: 'text-purple-600',  dot: 'bg-purple-500' },
+  client:      { label: 'Klien',          color: 'text-rose-600',    dot: 'bg-rose-400' },
+};
+
 export default function LoginPage({ users, onLogin }: LoginPageProps) {
-  const [authMethod, setAuthMethod] = useState<'IAM_SSO' | 'EMAIL_PASS'>('IAM_SSO');
-  const [email, setEmail] = useState('maya.putri@lexiflow.co.id');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [mfaCode, setMfaCode] = useState('');
-  const [showMfa, setShowMfa] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [ssoProvider, setSsoProvider] = useState<string | null>(null);
-  const [selectedRole, setSelectedRole] = useState<UserRole>('admin');
+  const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
+  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowRoleDropdown(false);
+      }
+    };
+    if (showRoleDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showRoleDropdown]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     setTimeout(() => {
-      const matchedUser = users.find(u => u.email.toLowerCase() === email.toLowerCase()) || 
-                          users.find(u => u.role === selectedRole) || 
-                          users[0];
+      const matched = users.find(u => u.email.toLowerCase() === email.toLowerCase()) || users[0];
       setIsLoading(false);
-      onLogin(matchedUser);
+      onLogin(matched);
     }, 600);
   };
 
-  const handleSsoLogin = (provider: string, targetRole: UserRole) => {
-    setSsoProvider(provider);
-    setIsLoading(true);
+  const handleQuickLogin = (user: User) => {
+    setLoadingUserId(user.id);
     setTimeout(() => {
-      const targetUser = users.find(u => u.role === targetRole) || users[0];
-      setIsLoading(false);
-      onLogin(targetUser);
-    }, 800);
-  };
-
-  const handleQuickRoleSelect = (user: User) => {
-    setEmail(user.email);
-    setSelectedRole(user.role);
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+      setLoadingUserId(null);
       onLogin(user);
-    }, 400);
+    }, 420);
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-center items-center bg-slate-50 relative overflow-hidden select-none p-4">
-      {/* Background Micro Accents */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-indigo-100/50 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-purple-100/50 blur-3xl pointer-events-none" />
+    <div className="min-h-screen w-full flex bg-white">
+      {/* ── Left Panel (hidden on mobile) ── */}
+      <div className="hidden lg:flex lg:w-[420px] xl:w-[480px] shrink-0 flex-col justify-between bg-slate-950 p-10 relative overflow-hidden">
+        {/* Subtle grid texture */}
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)',
+            backgroundSize: '32px 32px',
+          }}
+        />
+        {/* Glow blobs */}
+        <div className="absolute -top-32 -left-32 w-64 h-64 rounded-full bg-indigo-600/20 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 rounded-full bg-violet-600/15 blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-lg relative z-10 space-y-5">
-        {/* IAM Trust Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200">
-            <ShieldCheck className="h-3.5 w-3.5 text-indigo-600" /> Enterprise IAM Identity Engine v4.2
-          </div>
-          <div className="flex items-center justify-center gap-2.5">
-            <div className="h-10 w-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
-              <Scale className="h-5 w-5" />
+        <div className="relative z-10">
+          {/* Brand */}
+          <div className="flex items-center gap-2.5 mb-12">
+            <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-md">
+              <Scale className="h-4 w-4 text-white" />
             </div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-              Waktunya Legal <span className="text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">IAM Portal</span>
-            </h1>
+            <span className="text-white font-black text-base tracking-tight">Waktunya Legal</span>
+            <span className="text-[9px] font-extrabold uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/10 text-white/60 border border-white/10">
+              PRO
+            </span>
           </div>
-          <p className="text-xs text-slate-500 max-w-md mx-auto">
-            Sistem Autentikasi Identity & Access Management (IAM) Waktunya Legal dengan Multi-Tenant Role Policies
+
+          {/* Hero copy */}
+          <div className="space-y-4 mb-10">
+            <h2 className="text-3xl font-black text-white leading-tight tracking-tight">
+              Legal Work<br />Management System
+            </h2>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Platform terpadu untuk manajemen work order, notaris, klien, dan keuangan legalitas perusahaan.
+            </p>
+          </div>
+
+          {/* Feature points */}
+          {[
+            'Work Order & Task Tracking',
+            'Notaris Document ZIP Exporter',
+            'Multi-Role IAM Access Control',
+            'Invoice & Billing Otomatis',
+          ].map((f) => (
+            <div key={f} className="flex items-center gap-2.5 py-2 border-b border-white/5">
+              <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 shrink-0" />
+              <span className="text-xs text-slate-300 font-medium">{f}</span>
+            </div>
+          ))}
+        </div>
+
+        <p className="relative z-10 text-[11px] text-slate-600">
+          © 2026 Waktunya Legal · Legal OS v2026
+        </p>
+      </div>
+
+      {/* ── Right Panel ── */}
+      <div className="flex flex-1 flex-col justify-center items-center p-6 sm:p-10 bg-slate-50">
+        <div className="w-full max-w-[400px] space-y-7">
+
+          {/* Mobile brand */}
+          <div className="flex lg:hidden items-center gap-2 mb-2">
+            <div className="h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center">
+              <Scale className="h-3.5 w-3.5 text-white" />
+            </div>
+            <span className="font-black text-sm text-slate-900">Waktunya Legal</span>
+          </div>
+
+          {/* Heading */}
+          <div className="space-y-1">
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Masuk ke akun</h1>
+            <p className="text-sm text-slate-500">Gunakan email atau pilih role untuk demo.</p>
+          </div>
+
+          {/* Email/Pass form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <input
+                  id="login-email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="nama@perusahaan.com"
+                  className="w-full rounded-xl py-2.5 pl-10 pr-4 text-sm bg-white border border-slate-200 text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-700">Password</label>
+                <a href="#" className="text-[11px] font-semibold text-indigo-600 hover:underline">Lupa password?</a>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <input
+                  id="login-password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full rounded-xl py-2.5 pl-10 pr-10 text-sm bg-white border border-slate-200 text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              id="login-submit-btn"
+              type="submit"
+              disabled={isLoading}
+              className="w-full rounded-xl py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              {isLoading
+                ? <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                : <><span>Masuk</span><ArrowRight className="h-4 w-4" /></>
+              }
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-slate-200" />
+            <span className="text-[11px] font-semibold text-slate-400">atau masuk sebagai</span>
+            <div className="flex-1 h-px bg-slate-200" />
+          </div>
+
+          {/* Quick Role Login - Dropdown */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+              className="w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50 transition-all disabled:opacity-50 cursor-pointer"
+              disabled={loadingUserId !== null}
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center text-[11px] font-black text-slate-600 shrink-0">
+                  👤
+                </div>
+                <div className="text-left flex-1 text-slate-900 font-medium text-sm">
+                  Pilih role untuk demo
+                </div>
+              </div>
+              <ChevronDown className={`h-3.5 w-3.5 text-slate-300 transition-transform ${showRoleDropdown ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showRoleDropdown && (
+              <div ref={dropdownRef} className="absolute z-10 bottom-full left-0 right-0 mb-1.5 rounded-xl border border-slate-200 bg-white shadow-xl py-1 animate-in fade-in-0 zoom-in-95 duration-150">
+                {users.map((u) => {
+                  const meta = ROLE_META[u.role];
+                  const isThisLoading = loadingUserId === u.id;
+                  return (
+                    <button
+                      key={u.id}
+                      id={`quick-login-${u.role}`}
+                      type="button"
+                      onClick={() => { handleQuickLogin(u); setShowRoleDropdown(false); }}
+                      disabled={loadingUserId !== null}
+                      className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left transition-all hover:bg-indigo-50/50 disabled:opacity-50 cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center text-[11px] font-black text-slate-600 shrink-0">
+                          {u.name.substring(0, 2).toUpperCase()}
+                        </div>
+                        <div className="text-left">
+                          <p className="text-xs font-bold text-slate-900 leading-tight">{u.name.split(',')[0]}</p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className={`inline-block h-1.5 w-1.5 rounded-full ${meta.dot}`} />
+                            <span className={`text-[10px] font-semibold ${meta.color}`}>{meta.label}</span>
+                          </div>
+                        </div>
+                      </div>
+                      {isThisLoading
+                        ? <div className="h-3.5 w-3.5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin shrink-0" />
+                        : <ChevronRight className="h-3.5 w-3.5 text-slate-300 shrink-0" />
+                      }
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Fill Demo Data Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setEmail('admin@legal.com');
+              setPassword('demo123');
+            }}
+            disabled={isLoading || loadingUserId !== null}
+            className="w-full flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 border border-slate-200 bg-slate-50 text-slate-600 font-medium text-sm hover:bg-slate-100 hover:border-slate-300 transition-all disabled:opacity-50 cursor-pointer"
+          >
+            <span className="text-[11px]">🪄</span>
+            <span>Isi Otomatis (Demo Admin)</span>
+          </button>
+
+          {/* Footer note */}
+          <p className="text-center text-[11px] text-slate-400">
+            Protected by TLS 1.3 · Waktunya Legal Legal OS © 2026
           </p>
-        </div>
-
-        {/* Login Card */}
-        <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-xl space-y-6">
-          {/* IAM Authentication Method Switcher */}
-          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-slate-100 border border-slate-200">
-            <button
-              type="button"
-              onClick={() => setAuthMethod('IAM_SSO')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                authMethod === 'IAM_SSO' 
-                  ? 'bg-white text-indigo-600 shadow-xs' 
-                  : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              <KeyRound className="h-3.5 w-3.5" /> Identity Provider (SSO)
-            </button>
-            <button
-              type="button"
-              onClick={() => setAuthMethod('EMAIL_PASS')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                authMethod === 'EMAIL_PASS' 
-                  ? 'bg-white text-indigo-600 shadow-xs' 
-                  : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              <Mail className="h-3.5 w-3.5" /> Kredensial Direct
-            </button>
-          </div>
-
-          {authMethod === 'IAM_SSO' ? (
-            /* IAM Enterprise SSO Options */
-            <div className="space-y-3">
-              <div className="text-center">
-                <h3 className="text-sm font-extrabold text-slate-900">Single Sign-On (IAM SSO)</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Masuk menggunakan protokol OIDC / SAML 2.0 Identity Provider perusahaan Anda</p>
-              </div>
-
-              <div className="space-y-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => handleSsoLogin('Google Workspace IAM', 'admin')}
-                  disabled={isLoading}
-                  className="w-full py-2.5 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs flex items-center justify-between transition-all group shadow-xs"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-6 w-6 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-xs font-black">
-                      G
-                    </div>
-                    <div className="text-left">
-                      <p className="text-xs font-bold text-slate-900">Google Workspace IAM</p>
-                      <p className="text-[10px] text-slate-400">OAuth 2.0 / SAML Single Sign-On</p>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleSsoLogin('Microsoft Entra ID', 'super_admin')}
-                  disabled={isLoading}
-                  className="w-full py-2.5 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs flex items-center justify-between transition-all group shadow-xs"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-6 w-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-black">
-                      MS
-                    </div>
-                    <div className="text-left">
-                      <p className="text-xs font-bold text-slate-900">Microsoft Entra ID (Azure AD)</p>
-                      <p className="text-[10px] text-slate-400">Enterprise Tenant Directory Sync</p>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleSsoLogin('Okta IAM Provider', 'technical')}
-                  disabled={isLoading}
-                  className="w-full py-2.5 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs flex items-center justify-between transition-all group shadow-xs"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-6 w-6 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center text-xs font-black">
-                      OK
-                    </div>
-                    <div className="text-left">
-                      <p className="text-xs font-bold text-slate-900">Okta Identity Cloud</p>
-                      <p className="text-[10px] text-slate-400">IAM Policy & Zero-Trust MFA</p>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
-                </button>
-              </div>
-
-              {ssoProvider && isLoading && (
-                <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-center space-y-1.5 animate-in fade-in">
-                  <div className="inline-block h-4 w-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                  <p className="text-xs font-bold text-indigo-900">Memverifikasi Token IAM via {ssoProvider}...</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            /* Email & Password IAM Credential Form */
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-extrabold text-slate-700 mb-1.5">
-                  Identity Identifier (Email / IAM User ID)
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="nama@perusahaan.com"
-                    className="w-full rounded-xl py-2.5 pl-10 pr-4 text-xs bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-extrabold text-slate-700">
-                    Kata Sandi IAM
-                  </label>
-                  <a href="#" className="text-[11px] font-bold text-indigo-600 hover:underline">
-                    Reset kredensial IAM?
-                  </a>
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••••••"
-                    className="w-full rounded-xl py-2.5 pl-10 pr-10 text-xs bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-1">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    defaultChecked 
-                    className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" 
-                  />
-                  <span className="text-xs font-semibold text-slate-600">Simpan Sesi IAM (30 Hari)</span>
-                </label>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full rounded-xl py-3 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-extrabold text-xs shadow-xs transition-all flex items-center justify-center gap-2 disabled:opacity-70"
-              >
-                {isLoading ? (
-                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <span>Autentikasi Identity & Masuk</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
-              </button>
-            </form>
-          )}
-
-          {/* IAM Role-Based Access Control (RBAC) Selector Demo */}
-          <div className="pt-4 border-t border-slate-100">
-            <div className="flex items-center justify-between mb-2.5">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                <Layers className="h-3.5 w-3.5 text-indigo-600" /> Simulasi Role IAM (RBAC Demo)
-              </span>
-              <span className="text-[10px] font-bold text-slate-400">5 Scope Role</span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {users.map((u) => (
-                <button
-                  key={u.id}
-                  type="button"
-                  onClick={() => handleQuickRoleSelect(u)}
-                  className="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-300 text-left transition-all group"
-                >
-                  <div className="h-7 w-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-black group-hover:bg-indigo-600 group-hover:text-white transition-colors shrink-0">
-                    {u.name.substring(0, 2).toUpperCase()}
-                  </div>
-                  <div className="truncate min-w-0">
-                    <p className="text-[11px] font-bold text-slate-900 truncate">{u.name.split(' ')[0]}</p>
-                    <p className="text-[9px] font-bold text-slate-500 truncate">{u.role}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Security & IAM Metadata Footer */}
-        <div className="flex items-center justify-between text-[11px] text-slate-400 px-2">
-          <span className="flex items-center gap-1">
-            <Fingerprint className="h-3.5 w-3.5 text-emerald-600" /> TLS 1.3 Encryption
-          </span>
-          <span>LexiFlow IAM Server v2026</span>
-          <span className="flex items-center gap-1">
-            <Globe className="h-3.5 w-3.5 text-indigo-500" /> Multi-Tenant
-          </span>
         </div>
       </div>
     </div>

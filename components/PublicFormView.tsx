@@ -2,24 +2,17 @@
 
 import React, { useState } from 'react';
 import { 
-  FileText, 
-  Upload, 
-  CheckCircle2, 
-  Clock, 
   Download, 
   Archive, 
-  ShieldCheck, 
-  Sparkles, 
-  Building2, 
-  KeyRound, 
-  AlertCircle,
+  Clock,
   FileCheck,
-  ChevronRight,
+  CheckCircle2,
   ExternalLink,
-  Info,
-  Calendar,
-  Layers,
-  Send
+  ShieldCheck,
+  FileText,
+  User,
+  Building2,
+  Calendar
 } from 'lucide-react';
 import JSZip from 'jszip';
 
@@ -94,113 +87,49 @@ const INITIAL_SUBMISSIONS: FormSubmission[] = [
       { name: 'NPWP_Anisa_Rahmawati.pdf', category: 'NPWP Pemilik', size: '310 KB' }
     ],
     status: 'SUBMITTED'
+  },
+  {
+    id: 'SUB-2026-003',
+    formType: 'PENDIRIAN_CV',
+    clientName: 'Rina Sugiarto',
+    companyName: 'CV Karya Mandiri Sejahtera',
+    email: 'admin@karyamandiri.co.id',
+    phone: '0813-1122-3344',
+    submittedAt: '2026-09-18 14:20',
+    slaDays: 7,
+    slaDeadline: '2026-09-25',
+    selectedAgendas: [],
+    rincianPerubahan: 'Pendirian CV baru untuk bidang jasa konstruksi skala menengah.',
+    uploadedFiles: [
+      { name: 'KTP_Rina_Sugiarto.pdf', category: 'KTP Sekutu Aktif', size: '1.1 MB' },
+      { name: 'KTP_Sekutu_Pasif.pdf', category: 'KTP Sekutu Pasif', size: '1.0 MB' },
+      { name: 'NPWP_Rina.pdf', category: 'NPWP Sekutu', size: '280 KB' }
+    ],
+    status: 'SUBMITTED'
   }
 ];
 
+const FORM_TYPE_BADGE: Record<LegalFormType, { label: string; color: string }> = {
+  PENDIRIAN_PT:            { label: 'Pendirian PT',         color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  PENDIRIAN_CV:            { label: 'Pendirian CV',         color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  PENDIRIAN_PT_PERORANGAN: { label: 'Pendirian PT Perorang',color: 'bg-amber-50 text-amber-700 border-amber-200' },
+  PERUBAHAN_PT:            { label: 'Perubahan PT',         color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  PERUBAHAN_CV:            { label: 'Perubahan CV',         color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  PERUBAHAN_PT_PERORANGAN: { label: 'Perubahan PT Perorang',color: 'bg-orange-50 text-orange-700 border-orange-200' },
+  RUPS_TAHUNAN:            { label: 'RUPS Tahunan',         color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+};
+
 export default function PublicFormView() {
-  const [activeSubTab, setActiveSubTab] = useState<'PUBLIC_FORM' | 'NOTARY_BACKDATA'>('PUBLIC_FORM');
-  const [selectedFormType, setSelectedFormType] = useState<LegalFormType>('PERUBAHAN_PT');
-  
-  // Client Form Input States
-  const [clientName, setClientName] = useState('');
-  const [companyName, setCompanyName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [ossEmail, setOssEmail] = useState('');
-  const [ossPassword, setOssPassword] = useState('');
-  const [coretaxPassword, setCoretaxPassword] = useState('');
-  const [ahuUser, setAhuUser] = useState('');
-  const [ahuPassword, setAhuPassword] = useState('');
-  const [selectedAgendas, setSelectedAgendas] = useState<string[]>([]);
-  const [rincianPerubahan, setRincianPerubahan] = useState('');
-  const [uploadedFiles, setUploadedFiles] = useState<{ name: string; category: string; size: string }[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmittedSuccess, setIsSubmittedSuccess] = useState(false);
-
-  // Submissions List
-  const [submissions, setSubmissions] = useState<FormSubmission[]>(INITIAL_SUBMISSIONS);
+  const [submissions] = useState<FormSubmission[]>(INITIAL_SUBMISSIONS);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const getFormSlaInfo = (type: LegalFormType) => {
-    switch(type) {
-      case 'PENDIRIAN_PT':
-      case 'PENDIRIAN_CV':
-      case 'PERUBAHAN_PT':
-      case 'PERUBAHAN_CV':
-        return { days: 7, label: '7 Hari Kerja (SLA Max)' };
-      case 'PENDIRIAN_PT_PERORANGAN':
-      case 'PERUBAHAN_PT_PERORANGAN':
-        return { days: 2, label: '2 Hari Kerja (Express SLA)' };
-      case 'RUPS_TAHUNAN':
-        return { days: 5, label: '5 Hari Kerja (SLA Max)' };
-      default:
-        return { days: 7, label: '7 Hari Kerja' };
-    }
-  };
-
-  const handleAgendaToggle = (agenda: string) => {
-    setSelectedAgendas(prev => 
-      prev.includes(agenda) ? prev.filter(a => a !== agenda) : [...prev, agenda]
-    );
-  };
-
-  const handleFileUploadSim = (category: string) => {
-    const fakeNames = [`${category.replace(/[^a-zA-Z0-9]/g, '_')}_Dokumen.pdf`];
-    const newFile = {
-      name: fakeNames[0],
-      category,
-      size: `${(Math.random() * 2 + 0.5).toFixed(1)} MB`
-    };
-    setUploadedFiles(prev => [...prev.filter(f => f.category !== category), newFile]);
-  };
-
-  const handleSubmitForm = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    const slaInfo = getFormSlaInfo(selectedFormType);
-    const deadlineDate = new Date();
-    deadlineDate.setDate(deadlineDate.getDate() + slaInfo.days);
-
-    const newSub: FormSubmission = {
-      id: `SUB-2026-0${submissions.length + 3}`,
-      formType: selectedFormType,
-      clientName: clientName || 'Klien LexiFlow',
-      companyName: companyName || 'PT Legal Prima Indonesia',
-      email: email || 'klien@example.com',
-      phone: phone || '0812-3456-7890',
-      submittedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      slaDays: slaInfo.days,
-      slaDeadline: deadlineDate.toISOString().slice(0, 10),
-      ossEmail,
-      ossPassword,
-      coretaxPassword,
-      ahuUser,
-      ahuPassword,
-      selectedAgendas,
-      rincianPerubahan,
-      uploadedFiles: uploadedFiles.length > 0 ? uploadedFiles : [
-        { name: 'KTP_NPWP_Direktur.pdf', category: 'KTP & NPWP Direktur', size: '1.4 MB' },
-        { name: 'Akta_Pendirian.pdf', category: 'Akta Pendirian', size: '2.8 MB' }
-      ],
-      status: 'SUBMITTED'
-    };
-
-    setTimeout(() => {
-      setSubmissions(prev => [newSub, ...prev]);
-      setIsSubmitting(false);
-      setIsSubmittedSuccess(true);
-    }, 800);
-  };
-
-  // ZIP Exporter for Notary Pain Point Solution
   const handleExportZipForNotary = async (sub: FormSubmission) => {
     setDownloadingId(sub.id);
     const zip = new JSZip();
 
-    // 1. Generate Form Summary Text File
     let summaryContent = `=================================================================\n`;
-    summaryContent += `    LEXIFLOW LEGAL OS - BACK DATA FORM NOTARIS BUNDLE\n`;
+    summaryContent += `    WAKTUNYA LEGAL - BACK DATA NOTARIS BUNDLE\n`;
     summaryContent += `=================================================================\n\n`;
     summaryContent += `ID Pengajuan     : ${sub.id}\n`;
     summaryContent += `Tipe Formulir    : ${sub.formType.replace(/_/g, ' ')}\n`;
@@ -211,7 +140,6 @@ export default function PublicFormView() {
     summaryContent += `Waktu Submit     : ${sub.submittedAt}\n`;
     summaryContent += `SLA Maksimal     : ${sub.slaDays} Hari (Batas Selesai: ${sub.slaDeadline})\n`;
     summaryContent += `Ket. Operasional : Tutup Hari Minggu | Jam Kerja Mon-Sat 09:00 - 20:00 WIB\n\n`;
-
     summaryContent += `-----------------------------------------------------------------\n`;
     summaryContent += `KREDENSIAL AKUN KLIEN (CONFIDENTIAL)\n`;
     summaryContent += `-----------------------------------------------------------------\n`;
@@ -223,9 +151,7 @@ export default function PublicFormView() {
     if (!sub.ossEmail && !sub.coretaxPassword && !sub.ahuUser) {
       summaryContent += `Tidak memerlukan kredensial khusus.\n`;
     }
-    summaryContent += `\n`;
-
-    summaryContent += `-----------------------------------------------------------------\n`;
+    summaryContent += `\n-----------------------------------------------------------------\n`;
     summaryContent += `AGENDA PERUBAHAN & RINCIAN PERMINTAAN\n`;
     summaryContent += `-----------------------------------------------------------------\n`;
     if (sub.selectedAgendas.length > 0) {
@@ -236,32 +162,29 @@ export default function PublicFormView() {
     } else {
       summaryContent += `Agenda: Pendirian Baru / Standard Submission\n`;
     }
-    summaryContent += `\nRincian Perubahan:\n"${sub.rincianPerubahan || 'Tidak ada catatan tambahan.'}"\n\n`;
-
+    summaryContent += `\nRincian:\n"${sub.rincianPerubahan || 'Tidak ada catatan tambahan.'}"\n\n`;
     summaryContent += `-----------------------------------------------------------------\n`;
-    summaryContent += `DAFTAR BERKAS TERLAMPIR IN ZIP BUNDLE\n`;
+    summaryContent += `DAFTAR BERKAS TERLAMPIR\n`;
     summaryContent += `-----------------------------------------------------------------\n`;
     sub.uploadedFiles.forEach((file, idx) => {
       summaryContent += `  ${idx + 1}. [${file.category}] ${file.name} (${file.size})\n`;
     });
 
-    zip.file("00_Ringkasan_Form_Notaris.txt", summaryContent);
+    zip.file('00_Ringkasan_Form_Notaris.txt', summaryContent);
 
-    // 2. Add Dummy Sample Docs into Zip Folder
-    const docsFolder = zip.folder("Dokumen_Lampiran_Klien");
+    const docsFolder = zip.folder('Dokumen_Lampiran_Klien');
     sub.uploadedFiles.forEach(file => {
       docsFolder?.file(
-        file.name, 
-        `BERKAS SAMPLE DOKUMEN [${file.category}]\nLexiFlow Multi-Tenant Portal Asset Verification Code: ${Math.random().toString(36).substring(7).toUpperCase()}\nSubmitted for: ${sub.companyName}`
+        file.name,
+        `BERKAS SAMPLE DOKUMEN [${file.category}]\nWaktunya Legal Back Data Bundle\nVerification: ${Math.random().toString(36).substring(7).toUpperCase()}\nDiajukan untuk: ${sub.companyName}`
       );
     });
 
-    // 3. Generate ZIP & Trigger Download
-    const blob = await zip.generateAsync({ type: "blob" });
+    const blob = await zip.generateAsync({ type: 'blob' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
-    a.download = `Notary_Package_${sub.formType}_${sub.companyName.replace(/[^a-zA-Z0-9]/g, '_')}.zip`;
+    a.download = `NotaryPkg_${sub.formType}_${sub.companyName.replace(/[^a-zA-Z0-9]/g, '_')}.zip`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -269,474 +192,182 @@ export default function PublicFormView() {
     setDownloadingId(null);
   };
 
-  const perubahPTAgendas = [
-    'Perubahan Direktur',
-    'Perubahan Komisaris',
-    'Perpanjangan Jabatan Direktur',
-    'Perpanjangan Jabatan Komisaris',
-    'Jual Beli Saham',
-    'Hibah Saham',
-    'Merger',
-    'Perubahan Modal Dasar',
-    'Perubahan atau Peningkatan Modal Setor',
-    'Perubahan KBLI',
-    'Perubahan Nama PT',
-    'Perubahan Alamat (Dalam 1 Kota/Kab)',
-    'Perubahan Alamat (Dalam 1 Provinsi)',
-    'Perubahan Alamat (Beda Provinsi)'
-  ];
-
-  const perubahanCVAgendas = [
-    'Perubahan Sekutu Aktif',
-    'Perubahan Sekutu Pasif',
-    'Pengalihan Modal',
-    'Perubahan Modal',
-    'Perubahan KBLI',
-    'Perubahan Nama CV',
-    'Perubahan Alamat (Dalam 1 Kota/Kab)',
-    'Perubahan Alamat (Dalam 1 Provinsi)',
-    'Perubahan Alamat (Beda Provinsi)'
-  ];
+  const totalFiles = submissions.reduce((sum, s) => sum + s.uploadedFiles.length, 0);
 
   return (
-    <div className="space-y-6">
-      {/* SLA & Operating Hours Banner */}
+    <div className="space-y-5">
+      {/* Header Banner */}
       <div className="rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-5 text-white shadow-lg relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute right-0 top-0 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-extrabold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
               <Clock className="h-3.5 w-3.5 text-amber-400" /> Jam Operasional: Mon - Sat 09:00 - 20:00 WIB (Minggu Tutup)
             </div>
             <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-              <FileCheck className="h-5 w-5 text-indigo-400" /> Form Legalitas Klien & Exporter Notaris ZIP
+              <Archive className="h-5 w-5 text-indigo-400" /> Back Data Notaris — ZIP Exporter
             </h2>
             <p className="text-xs text-slate-300 max-w-2xl">
-              Portal input berkas terstruktur untuk Pendirian/Perubahan PT, CV, PT Perorangan, dan RUPS Tahunan dengan otomatisasi pengunduhan ZIP bundle untuk Notaris.
+              Semua formulir yang telah diisi klien via portal publik tersimpan di sini. Notaris & Admin dapat mengunduh seluruh berkas dalam satu file ZIP terkompresi — tidak perlu buka link Drive satu per satu.
             </p>
           </div>
-
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 shrink-0">
-            <a
-              href="/form"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-2 rounded-xl text-xs font-black bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-md transition-all flex items-center gap-1.5"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              <span>Buka Form Klien (/form)</span>
-            </a>
-            
-            <div className="flex items-center gap-2 rounded-xl bg-white/10 backdrop-blur-md p-1.5 border border-white/10 shrink-0">
-              <button
-                onClick={() => setActiveSubTab('NOTARY_BACKDATA')}
-                className={`px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  activeSubTab === 'NOTARY_BACKDATA'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <Archive className="h-3.5 w-3.5" /> Back Data Notaris (ZIP)
-              </button>
-            </div>
-          </div>
+          <a
+            href="/form"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3.5 py-2 rounded-xl text-xs font-black bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-md transition-all flex items-center gap-1.5 shrink-0"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            <span>Buka Form Klien (/form)</span>
+          </a>
         </div>
       </div>
 
-      {activeSubTab === 'PUBLIC_FORM' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left: Service Type Selection & SLA Cards */}
-          <div className="lg:col-span-4 space-y-4">
-            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
-              <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">Pilih Jenis Layanan</h3>
-              
-              <div className="space-y-1.5">
-                {[
-                  { id: 'PENDIRIAN_PT', name: 'Pendirian PT', sla: '7 Hari SLA Max', type: 'Standard PT' },
-                  { id: 'PENDIRIAN_CV', name: 'Pendirian CV', sla: '7 Hari SLA Max', type: 'Standard CV' },
-                  { id: 'PENDIRIAN_PT_PERORANGAN', name: 'Pendirian PT Perorangan', sla: '2 Hari SLA Express', type: 'Express PT' },
-                  { id: 'PERUBAHAN_PT', name: 'Perubahan PT', sla: '7 Hari SLA Max', type: 'Akta Perubahan' },
-                  { id: 'PERUBAHAN_CV', name: 'Perubahan CV', sla: '7 Hari SLA Max', type: 'Akta Perubahan' },
-                  { id: 'PERUBAHAN_PT_PERORANGAN', name: 'Perubahan PT Perorangan', sla: '2 Hari SLA Express', type: 'Express PT' },
-                  { id: 'RUPS_TAHUNAN', name: 'RUPS Tahunan', sla: '5 Hari SLA Max', type: 'Submit Dokumen' },
-                ].map((s) => {
-                  const isSelected = selectedFormType === s.id;
-                  return (
-                    <button
-                      key={s.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedFormType(s.id as LegalFormType);
-                        setIsSubmittedSuccess(false);
-                      }}
-                      className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between group ${
-                        isSelected 
-                          ? 'border-indigo-600 bg-indigo-50/70 text-indigo-900 shadow-xs'
-                          : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
-                      }`}
-                    >
-                      <div>
-                        <p className="text-xs font-black">{s.name}</p>
-                        <p className="text-[10px] text-slate-500 font-semibold">{s.type}</p>
-                      </div>
-                      <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
-                        s.sla.includes('2 Hari') 
-                          ? 'bg-amber-100 text-amber-800 border border-amber-200' 
-                          : 'bg-indigo-100 text-indigo-800 border border-indigo-200'
-                      }`}>
-                        {s.sla}
+      {/* Stats Row */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm text-center">
+          <p className="text-2xl font-black text-indigo-600">{submissions.length}</p>
+          <p className="text-[11px] text-slate-500 font-semibold mt-0.5">Total Submission</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm text-center">
+          <p className="text-2xl font-black text-emerald-600">{totalFiles}</p>
+          <p className="text-[11px] text-slate-500 font-semibold mt-0.5">Total Berkas</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm text-center">
+          <p className="text-2xl font-black text-amber-500">{submissions.filter(s => s.status === 'SUBMITTED').length}</p>
+          <p className="text-[11px] text-slate-500 font-semibold mt-0.5">Menunggu Proses</p>
+        </div>
+      </div>
+
+      {/* Submission Cards */}
+      <div className="space-y-3">
+        {submissions.map((sub) => {
+          const badge = FORM_TYPE_BADGE[sub.formType];
+          const isExpanded = expandedId === sub.id;
+          const isDownloading = downloadingId === sub.id;
+
+          return (
+            <div key={sub.id} className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+              {/* Card Header */}
+              <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
+                    <FileText className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono font-black text-xs text-indigo-600">{sub.id}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${badge.color}`}>
+                        {badge.label}
                       </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* SLA Rules Box */}
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-xs space-y-2">
-              <h4 className="font-extrabold text-slate-900 flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4 text-emerald-600" /> Ketentuan SLA & Pembayaran
-              </h4>
-              <p className="text-[11px] text-slate-600 leading-relaxed">
-                Perhitungan batas waktu SLA dimulai tepat saat **pembayaran pertama (DP) atau Full terverifikasi** dalam sistem.
-              </p>
-              <div className="pt-2 border-t border-slate-200/80 space-y-1 text-[11px] font-semibold text-slate-700">
-                <p>• Pendirian / Perubahan PT & CV: <strong className="text-indigo-600">7 Hari Total</strong></p>
-                <p>• PT Perorangan (Pendirian/Perubahan): <strong className="text-amber-600">2 Hari Max</strong></p>
-                <p>• RUPS Tahunan: <strong className="text-emerald-600">5 Hari Max</strong></p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Dynamic Intake Form */}
-          <div className="lg:col-span-8">
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
-              {isSubmittedSuccess ? (
-                <div className="text-center py-12 space-y-4">
-                  <div className="h-14 w-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
-                    <CheckCircle2 className="h-8 w-8" />
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        {sub.slaDays} Hari SLA
+                      </span>
+                    </div>
+                    <p className="font-black text-sm text-slate-900 mt-0.5">{sub.companyName}</p>
+                    <div className="flex items-center gap-3 mt-0.5 text-[11px] text-slate-500 font-medium">
+                      <span className="flex items-center gap-1"><User className="h-3 w-3" />{sub.clientName}</span>
+                      <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{sub.submittedAt}</span>
+                      <span className="flex items-center gap-1"><FileCheck className="h-3 w-3" />{sub.uploadedFiles.length} berkas</span>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-black text-slate-900">Formulir Berhasil Disubmit!</h3>
-                    <p className="text-xs text-slate-500 max-w-md mx-auto">
-                      Data dan berkas Anda telah tersimpan secara otomatis di server LexiFlow dan siap diproses oleh Notaris dalam format ZIP Bundle.
-                    </p>
-                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
                   <button
-                    onClick={() => {
-                      setIsSubmittedSuccess(false);
-                      setActiveSubTab('NOTARY_BACKDATA');
-                    }}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-md hover:bg-indigo-500 transition-all"
+                    onClick={() => setExpandedId(isExpanded ? null : sub.id)}
+                    className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all cursor-pointer"
                   >
-                    <Archive className="h-4 w-4" /> Lihat & Download ZIP Notaris
+                    {isExpanded ? 'Tutup' : 'Lihat Detail'}
+                  </button>
+                  <button
+                    onClick={() => handleExportZipForNotary(sub)}
+                    disabled={isDownloading}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    <span>{isDownloading ? 'Mengunduh...' : 'Download ZIP'}</span>
                   </button>
                 </div>
-              ) : (
-                <form onSubmit={handleSubmitForm} className="space-y-6">
-                  {/* Form Title & SLA Badge */}
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              </div>
+
+              {/* Expanded Detail */}
+              {isExpanded && (
+                <div className="border-t border-slate-100 p-4 bg-slate-50 space-y-4">
+                  {/* Client Info */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                     <div>
-                      <h3 className="text-base font-black text-slate-900">
-                        Formulir {selectedFormType.replace(/_/g, ' ')}
-                      </h3>
-                      <p className="text-xs text-slate-500">Lengkapi data dan unggah berkas persyaratan resmi</p>
+                      <p className="text-slate-400 font-semibold uppercase tracking-wider text-[9px] mb-0.5">Email</p>
+                      <p className="font-bold text-slate-800">{sub.email}</p>
                     </div>
-                    <div className="text-right">
-                      <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                        SLA Target: {getFormSlaInfo(selectedFormType).label}
+                    <div>
+                      <p className="text-slate-400 font-semibold uppercase tracking-wider text-[9px] mb-0.5">WhatsApp</p>
+                      <p className="font-bold text-slate-800">{sub.phone}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 font-semibold uppercase tracking-wider text-[9px] mb-0.5">Deadline SLA</p>
+                      <p className="font-bold text-rose-600">{sub.slaDeadline}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 font-semibold uppercase tracking-wider text-[9px] mb-0.5">Status</p>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200">
+                        {sub.status === 'SUBMITTED' ? 'Menunggu Proses' : sub.status}
                       </span>
                     </div>
                   </div>
 
-                  {/* Section 1: Data Identitas Pemohon */}
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">1. Data Pemohon & Perusahaan</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                      <div>
-                        <label className="block font-bold text-slate-700 mb-1">Nama Pemohon (Klien) *</label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="cth. Hendra Wijaya, S.E."
-                          value={clientName}
-                          onChange={(e) => setClientName(e.target.value)}
-                          className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-indigo-600"
-                        />
-                      </div>
-                      <div>
-                        <label className="block font-bold text-slate-700 mb-1">Nama Perusahaan *</label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="cth. PT Nusantara Tech Solution"
-                          value={companyName}
-                          onChange={(e) => setCompanyName(e.target.value)}
-                          className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-indigo-600"
-                        />
-                      </div>
-                      <div>
-                        <label className="block font-bold text-slate-700 mb-1">Email Aktif *</label>
-                        <input
-                          type="email"
-                          required
-                          placeholder="contact@perusahaan.id"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-indigo-600"
-                        />
-                      </div>
-                      <div>
-                        <label className="block font-bold text-slate-700 mb-1">No. WhatsApp *</label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="0812-XXXX-XXXX"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-indigo-600"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Section 2: Kredensial Akun Perusahaan (If Perubahan) */}
-                  {(selectedFormType.includes('PERUBAHAN') || selectedFormType === 'RUPS_TAHUNAN') && (
-                    <div className="space-y-3 pt-2">
-                      <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">2. Akses Portal Pemerintah (Kredensial)</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        {selectedFormType === 'PERUBAHAN_PT_PERORANGAN' && (
-                          <>
-                            <div>
-                              <label className="block font-bold text-slate-700 mb-1">User Akun AHU Online</label>
-                              <input
-                                type="text"
-                                placeholder="Username AHU"
-                                value={ahuUser}
-                                onChange={(e) => setAhuUser(e.target.value)}
-                                className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs text-slate-900"
-                              />
-                            </div>
-                            <div>
-                              <label className="block font-bold text-slate-700 mb-1">Password AHU Online</label>
-                              <input
-                                type="password"
-                                placeholder="••••••••"
-                                value={ahuPassword}
-                                onChange={(e) => setAhuPassword(e.target.value)}
-                                className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs text-slate-900"
-                              />
-                            </div>
-                          </>
-                        )}
-                        <div>
-                          <label className="block font-bold text-slate-700 mb-1">Email OSS PT / CV</label>
-                          <input
-                            type="email"
-                            placeholder="Email akun OSS"
-                            value={ossEmail}
-                            onChange={(e) => setOssEmail(e.target.value)}
-                            className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs text-slate-900"
-                          />
-                        </div>
-                        <div>
-                          <label className="block font-bold text-slate-700 mb-1">Password OSS PT / CV</label>
-                          <input
-                            type="password"
-                            placeholder="••••••••"
-                            value={ossPassword}
-                            onChange={(e) => setOssPassword(e.target.value)}
-                            className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs text-slate-900"
-                          />
-                        </div>
-                        <div>
-                          <label className="block font-bold text-slate-700 mb-1">Password Coretax DJP PT</label>
-                          <input
-                            type="password"
-                            placeholder="••••••••"
-                            value={coretaxPassword}
-                            onChange={(e) => setCoretaxPassword(e.target.value)}
-                            className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs text-slate-900"
-                          />
-                        </div>
+                  {/* Credentials */}
+                  {(sub.ossEmail || sub.coretaxPassword || sub.ahuUser) && (
+                    <div className="rounded-xl bg-white border border-slate-200 p-3">
+                      <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1">
+                        <ShieldCheck className="h-3 w-3 text-rose-500" /> Kredensial Portal (Confidential)
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                        {sub.ossEmail && <div><span className="text-slate-400">OSS Email: </span><strong>{sub.ossEmail}</strong></div>}
+                        {sub.ossPassword && <div><span className="text-slate-400">OSS Pass: </span><strong className="font-mono">{sub.ossPassword}</strong></div>}
+                        {sub.coretaxPassword && <div><span className="text-slate-400">Coretax: </span><strong className="font-mono">{sub.coretaxPassword}</strong></div>}
                       </div>
                     </div>
                   )}
 
-                  {/* Section 3: Agenda Perubahan (Multiple Checkbox) */}
-                  {selectedFormType.includes('PERUBAHAN') && (
-                    <div className="space-y-3 pt-2">
-                      <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
-                        3. Agenda Perubahan (Boleh Pilih Lebih dari 1)
-                      </h4>
-                      
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                        {(selectedFormType === 'PERUBAHAN_PT' ? perubahPTAgendas : perubahanCVAgendas).map((item) => {
-                          const isChecked = selectedAgendas.includes(item);
-                          return (
-                            <label
-                              key={item}
-                              onClick={() => handleAgendaToggle(item)}
-                              className={`p-2.5 rounded-xl border cursor-pointer transition-all flex items-center gap-2 select-none ${
-                                isChecked 
-                                  ? 'border-indigo-600 bg-indigo-50 text-indigo-900 font-bold' 
-                                  : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                              }`}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={() => {}}
-                                className="rounded text-indigo-600 focus:ring-indigo-500"
-                              />
-                              <span>{item}</span>
-                            </label>
-                          );
-                        })}
+                  {/* Agendas */}
+                  {sub.selectedAgendas.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Agenda Perubahan</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {sub.selectedAgendas.map(a => (
+                          <span key={a} className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">{a}</span>
+                        ))}
                       </div>
-
-                      <div className="pt-2">
-                        <label className="block font-bold text-slate-700 mb-1">Rincian Perubahan (Deskripsikan detail perubahan) *</label>
-                        <textarea
-                          rows={3}
-                          placeholder="Tuliskan keterangan detail perubahan yang diinginkan..."
-                          value={rincianPerubahan}
-                          onChange={(e) => setRincianPerubahan(e.target.value)}
-                          className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-indigo-600"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Section 4: Document Upload Dropzones */}
-                  <div className="space-y-3 pt-2">
-                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
-                      {selectedFormType.includes('PERUBAHAN') ? '4' : '2'}. Upload Berkas Persyaratan Resmi
-                    </h4>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                      {[
-                        'KTP & NPWP Direktur',
-                        'KTP & NPWP Komisaris / Sekutu',
-                        'Akta Pendirian',
-                        'SK AHU Pendirian',
-                        'Seluruh Akta & SK Perubahan',
-                        'NPWP Perusahaan',
-                        'KOP Surat PT (Opsional)'
-                      ].map((docLabel) => {
-                        const uploaded = uploadedFiles.find(f => f.category === docLabel);
-                        return (
-                          <div key={docLabel} className="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
-                            <div className="min-w-0">
-                              <p className="font-bold text-slate-900 truncate">{docLabel}</p>
-                              {uploaded ? (
-                                <p className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
-                                  <CheckCircle2 className="h-3 w-3" /> {uploaded.name} ({uploaded.size})
-                                </p>
-                              ) : (
-                                <p className="text-[10px] text-slate-400">Belum diunggah</p>
-                              )}
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handleFileUploadSim(docLabel)}
-                              className="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-indigo-600 hover:text-indigo-600 font-bold text-[11px] shadow-xs shrink-0 transition-all"
-                            >
-                              {uploaded ? 'Ganti' : 'Upload'}
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg transition-all flex items-center gap-2"
-                    >
-                      {isSubmitting ? (
-                        <span>Memproses Submission...</span>
-                      ) : (
-                        <>
-                          <Send className="h-4 w-4" />
-                          <span>Submit Formulir {selectedFormType.replace(/_/g, ' ')}</span>
-                        </>
+                      {sub.rincianPerubahan && (
+                        <p className="mt-2 text-xs text-slate-600 bg-white border border-slate-200 rounded-lg p-2.5 italic">
+                          "{sub.rincianPerubahan}"
+                        </p>
                       )}
-                    </button>
+                    </div>
+                  )}
+
+                  {/* Uploaded Files */}
+                  <div>
+                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Berkas Terunggah ({sub.uploadedFiles.length})</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {sub.uploadedFiles.map((f, i) => (
+                        <div key={i} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white p-2.5">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-bold text-slate-800 truncate">{f.name}</p>
+                            <p className="text-[9px] text-slate-400">{f.category} · {f.size}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </form>
+                </div>
               )}
             </div>
-          </div>
-        </div>
-      ) : (
-        /* Notary Back Data Exporter (Solution to Excel link pain point) */
-        <div className="space-y-4">
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
-                <Archive className="h-4 w-4 text-indigo-600" /> Solusi Ekspor Back Data Notaris (1-Click ZIP Exporter)
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Notaris tidak perlu lagi membuka link Drive satu-per-satu di Excel. Klik tombol untuk mengunduh seluruh formulir dan lampiran dokumen terkompresi dalam 1 file ZIP lengkap.
-              </p>
-            </div>
-          </div>
-
-          {/* Submissions Table */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-500 font-bold uppercase border-b border-slate-200">
-                  <tr>
-                    <th className="py-3.5 px-4">ID Submission</th>
-                    <th className="py-3.5 px-4">Jenis Formulir</th>
-                    <th className="py-3.5 px-4">Nama Perusahaan / Klien</th>
-                    <th className="py-3.5 px-4">Waktu Submit</th>
-                    <th className="py-3.5 px-4">Target SLA</th>
-                    <th className="py-3.5 px-4">Jumlah Berkas</th>
-                    <th className="py-3.5 px-4 text-right">Aksi ZIP Notaris</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700">
-                  {submissions.map((sub) => (
-                    <tr key={sub.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-black text-indigo-600">{sub.id}</td>
-                      <td className="py-3.5 px-4 font-extrabold text-slate-900">
-                        {sub.formType.replace(/_/g, ' ')}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <p className="font-bold text-slate-900">{sub.companyName}</p>
-                        <p className="text-[10px] text-slate-500">{sub.clientName} ({sub.phone})</p>
-                      </td>
-                      <td className="py-3.5 px-4 font-mono text-slate-500">{sub.submittedAt}</td>
-                      <td className="py-3.5 px-4">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                          {sub.slaDays} Hari (Batas: {sub.slaDeadline})
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 font-bold">{sub.uploadedFiles.length} Dokumen</td>
-                      <td className="py-3.5 px-4 text-right">
-                        <button
-                          onClick={() => handleExportZipForNotary(sub)}
-                          disabled={downloadingId === sub.id}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-xs transition-all"
-                        >
-                          <Download className="h-3.5 w-3.5" />
-                          <span>{downloadingId === sub.id ? 'Mengunduh ZIP...' : 'Download Package ZIP Notaris'}</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 }

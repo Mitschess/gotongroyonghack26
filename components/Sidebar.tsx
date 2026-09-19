@@ -83,7 +83,7 @@ export default function Sidebar({
       defaultOpen: true,
       items: [
         { id: 'notary_tasks', label: 'Tugas Notaris', icon: FileCheck2, roles: ['notary'] },
-        { id: 'public_form', label: 'Back Data & ZIP', icon: Archive, roles: ['super_admin', 'admin'] },
+        { id: 'public_form', label: 'Back Data & ZIP', icon: Archive, roles: ['super_admin', 'admin', 'notary'] },
       ]
     },
     {
@@ -111,6 +111,7 @@ export default function Sidebar({
     { id: 'whatsapp', label: 'WA Proxy Hub', icon: MessageSquare, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'] },
     { id: 'clients', label: 'Klien & Perusahaan', icon: Users, roles: ['super_admin', 'admin', 'technical', 'finance'] },
     { id: 'notary_tasks', label: 'Tugas Notaris', icon: FileCheck2, roles: ['notary'] },
+    { id: 'public_form', label: 'Back Data & ZIP', icon: Archive, roles: ['notary'] },
     { id: 'finance', label: 'Invoice & Billing', icon: CreditCard, roles: ['finance'] },
     { id: 'reports', label: 'Laporan', icon: BarChart3, roles: ['super_admin', 'admin', 'finance'] },
     { id: 'client_portal', label: 'Portal Klien', icon: Layers, roles: ['client'] },

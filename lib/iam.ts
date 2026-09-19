@@ -9,7 +9,7 @@ export interface MenuItemPermission {
 // Master IAM Access Matrix across all Waktunya Legal tabs
 export const IAM_TAB_PERMISSIONS: Record<string, UserRole[]> = {
   todays_actions: ['super_admin', 'admin', 'technical'],
-  public_form:    ['super_admin', 'admin'],
+  public_form:    ['super_admin', 'admin', 'notary'],
   whatsapp:       ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'],
   notary_tasks:   ['notary'],
   dashboard:      ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'],
