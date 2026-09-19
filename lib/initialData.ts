@@ -20,9 +20,9 @@ export const INITIAL_USERS: User[] = [
   { id: 'usr-4', name: 'Siti Rahma, S.H.', email: 'siti.rahma@legalwork.co.id', role: 'technical', department: 'Licensing & Permits', phone: '0812-1000-0004' },
   { id: 'usr-5', name: 'Eko Prasetyo', email: 'eko.prasetyo@legalwork.co.id', role: 'admin', department: 'Administration', phone: '0812-1000-0005' },
   { id: 'usr-6', name: 'Agus Hermawan, A.Md.', email: 'agus.hermawan@legalwork.co.id', role: 'finance', department: 'Finance & Billing', phone: '0812-1000-0006' },
-  { id: 'usr-8', name: 'Notaris Soebagjo, S.H., M.Kn.', email: 'soebagjo.notaris@gmail.com', role: 'notary', department: 'Rekan Notaris Jakarta Pusat', phone: '0815-9988-1122' },
-  { id: 'usr-9', name: 'Notaris Dewi Anggraini, S.H.', email: 'dewi.notaris@gmail.com', role: 'notary', department: 'Rekan Notaris Jakarta Selatan', phone: '0817-2233-4455' },
-  { id: 'usr-7', name: 'Hendra Wijaya (PT Nusantara Tech)', email: 'hendra@nusantaratech.id', role: 'client', department: 'Client Portal', phone: '0812-9876-5432' }
+  { id: 'usr-8', name: 'Notaris Soebagjo, S.H., M.Kn.', email: 'soebagjo.notaris@gmail.com', role: 'notary', department: 'Rekan Notaris Jakarta Pusat', phone: '0815-9988-1122', linkedNotaryId: 'usr-8' },
+  { id: 'usr-9', name: 'Notaris Dewi Anggraini, S.H.', email: 'dewi.notaris@gmail.com', role: 'notary', department: 'Rekan Notaris Jakarta Selatan', phone: '0817-2233-4455', linkedNotaryId: 'usr-9' },
+  { id: 'usr-7', name: 'Hendra Wijaya (PT Nusantara Tech)', email: 'hendra@nusantaratech.id', role: 'client', department: 'Client Portal', phone: '0812-9876-5432', linkedClientId: 'cli-001' }
 ];
 
 
@@ -294,6 +294,67 @@ export const INITIAL_WORK_ORDERS: WorkOrder[] = [
       { stageId: 'stg-402', stageName: 'Penyiapan Berkas & Klasifikasi Kelas', status: 'Pending', clientFriendlyLabel: 'Penyiapan berkas DJKI' },
       { stageId: 'stg-403', stageName: 'Pendaftaran Online ke DJKI', status: 'Pending', clientFriendlyLabel: 'Submit ke DJKI Kemenkumham' },
       { stageId: 'stg-404', stageName: 'Penerbitan Bukti Agenda & Pengawasan', status: 'Pending', clientFriendlyLabel: 'Penerbitan Sertifikat Merek' }
+    ]
+  },
+  {
+    id: 'wo-105',
+    woNumber: 'WO-2026-00105',
+    clientId: 'cli-001',
+    clientName: 'PT Nusantara Tech Solution',
+    serviceId: 'srv-002',
+    serviceName: 'Perubahan Akta & Anggaran Dasar Perusahaan',
+    picStaffId: 'usr-4',
+    picStaffName: 'Siti Rahma, S.H.',
+    notaryId: 'usr-8',
+    notaryName: 'Notaris Soebagjo, S.H., M.Kn.',
+    priority: 'Medium',
+    startDate: '2026-09-16',
+    deadline: '2026-09-26',
+    status: 'To Do',
+    health: 'ON_TRACK',
+    blockedOn: 'CLIENT',
+    currentStageIndex: 0,
+    progressPercent: 15,
+    estimatedPrice: 6500000,
+    description: 'Perubahan susunan Direksi: penambahan Direktur baru + perubahan alamat kantor (dalam 1 kota).',
+    createdAt: '2026-09-16',
+    actionRequired: 'Tunggu kelengkapan KTP & NPWP Direktur baru dari klien',
+    clientActionItem: 'Mohon kirim KTP & NPWP Direktur baru secepatnya',
+    workflow: [
+      { stageId: 'stg-201', stageName: 'Pemeriksaan Dokumen RUPS', status: 'In Progress', clientFriendlyLabel: 'Proses pengumpulan berkas' },
+      { stageId: 'stg-202', stageName: 'Pembuatan Draf Akta Perubahan', status: 'Pending', clientFriendlyLabel: 'Draf perubahan disiapkan' },
+      { stageId: 'stg-203', stageName: 'Persetujuan / Pemberitahuan Kemenkumham', status: 'Pending', clientFriendlyLabel: 'Submit ke Kemenkumham' },
+      { stageId: 'stg-204', stageName: 'Update Data NIB / AHU Online', status: 'Pending', clientFriendlyLabel: 'Pembaruan NIB OSS' },
+      { stageId: 'stg-205', stageName: 'Penyerahan Salinan Akta', status: 'Pending', clientFriendlyLabel: 'Salinan akta diserahkan' }
+    ]
+  },
+  {
+    id: 'wo-106',
+    woNumber: 'WO-2026-00106',
+    clientId: 'cli-001',
+    clientName: 'PT Nusantara Tech Solution',
+    serviceId: 'srv-003',
+    serviceName: 'Pendaftaran NIB & Perizinan Berusaha OSS-RBA',
+    picStaffId: 'usr-3',
+    picStaffName: 'Budi Santoso, S.H.',
+    priority: 'High',
+    startDate: '2026-08-10',
+    deadline: '2026-08-20',
+    status: 'Completed',
+    health: 'ON_TRACK',
+    blockedOn: 'NONE',
+    currentStageIndex: 3,
+    progressPercent: 100,
+    estimatedPrice: 4500000,
+    description: 'Pengurusan NIB lini bisnis baru: KBLI 62090 Aktivitas Pemrograman Komputer Lainnya.',
+    createdAt: '2026-08-10',
+    actionRequired: 'Pekerjaan telah selesai.',
+    clientActionItem: 'NIB telah terbit dan dapat diunduh.',
+    workflow: [
+      { stageId: 'stg-301', stageName: 'Analisis KBLI & Verifikasi Lokasi', status: 'Completed', completedAt: '2026-08-12', completedBy: 'Budi Santoso, S.H.', clientFriendlyLabel: 'Analisis KBLI selesai' },
+      { stageId: 'stg-302', stageName: 'Penginputan Sistem OSS-RBA', status: 'Completed', completedAt: '2026-08-15', completedBy: 'Budi Santoso, S.H.', clientFriendlyLabel: 'Input OSS RBA selesai' },
+      { stageId: 'stg-303', stageName: 'Verifikasi Instansi Teknis', status: 'Completed', completedAt: '2026-08-17', completedBy: 'Budi Santoso, S.H.', clientFriendlyLabel: 'Verifikasi teknis selesai' },
+      { stageId: 'stg-304', stageName: 'Penerbitan Sertifikat Standar / NIB', status: 'Completed', completedAt: '2026-08-20', completedBy: 'Maya Putri, S.H.', clientFriendlyLabel: 'NIB resmi terbit' }
     ]
   }
 ];

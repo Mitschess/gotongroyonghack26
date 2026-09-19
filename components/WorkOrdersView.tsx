@@ -116,8 +116,19 @@ export default function WorkOrdersView({
   // Note input state
   const [newNoteText, setNewNoteText] = useState('');
 
+  // IAM Scoped Work Orders
+  const scopedWorkOrders = workOrders.filter(wo => {
+    if (userRole === 'client') {
+      return wo.clientId === 'cli-101' || wo.clientName.toLowerCase().includes('nusantara');
+    }
+    if (userRole === 'notary') {
+      return wo.notaryId === currentUserId || (wo.notaryName && wo.notaryName.toLowerCase().includes('soebagjo'));
+    }
+    return true;
+  });
+
   // Filtering
-  const filteredWorkOrders = workOrders.filter(wo => {
+  const filteredWorkOrders = scopedWorkOrders.filter(wo => {
     const matchesSearch = wo.woNumber.toLowerCase().includes(searchFilter.toLowerCase()) ||
                           wo.clientName.toLowerCase().includes(searchFilter.toLowerCase()) ||
                           wo.serviceName.toLowerCase().includes(searchFilter.toLowerCase());
@@ -240,12 +251,14 @@ export default function WorkOrdersView({
             </button>
           </div>
 
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-xs"
-          >
-            <Plus className="h-4 w-4" /> Work Order Baru
-          </button>
+          {['super_admin', 'admin', 'technical'].includes(userRole) && (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-xs cursor-pointer"
+            >
+              <Plus className="h-4 w-4" /> Work Order Baru
+            </button>
+          )}
         </div>
       </div>
 

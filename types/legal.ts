@@ -15,6 +15,8 @@ export interface User {
   avatarUrl?: string;
   department?: string;
   phone?: string;
+  linkedClientId?: string; // For role=client: links to Client.id
+  linkedNotaryId?: string; // For role=notary: matches WorkOrder.notaryId
 }
 
 export type ClientType = 'PT' | 'CV' | 'PMA' | 'Perorangan' | 'Yayasan' | 'Lainnya';

@@ -39,16 +39,16 @@ export default function Sidebar({
 }: SidebarProps) {
   const menuItems = [
     { id: 'todays_actions', label: "Today's Actions", icon: Zap, roles: ['super_admin', 'admin', 'technical'] },
-    { id: 'public_form', label: 'Back Data & ZIP Notaris', icon: Archive, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'] },
-    { id: 'whatsapp', label: 'WA Proxy Hub', icon: MessageSquare, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'] },
+    { id: 'public_form', label: 'Back Data & ZIP Notaris', icon: Archive, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary'] },
+    { id: 'whatsapp', label: 'WA Proxy Hub', icon: MessageSquare, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary'] },
     { id: 'ai', label: 'AI Suite & OCR', icon: Wand2, roles: ['super_admin', 'admin', 'technical'] },
     { id: 'notary_tasks', label: 'Tugas Notaris', icon: FileCheck2, roles: ['notary', 'super_admin', 'admin'] },
-    { id: 'client_portal', label: 'Client Timeline', icon: UserCheck, roles: ['client', 'super_admin'] },
+
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'] },
-    { id: 'workorders', label: 'Work Orders', icon: FolderKanban, roles: ['super_admin', 'admin', 'technical', 'client'] },
+    { id: 'workorders', label: 'Work Orders', icon: FolderKanban, roles: ['super_admin', 'admin', 'technical', 'client', 'notary'] },
     { id: 'clients', label: 'Klien & Perusahaan', icon: Users, roles: ['super_admin', 'admin', 'technical', 'finance'] },
     { id: 'services', label: 'Layanan Legalitas', icon: BookOpen, roles: ['super_admin', 'admin', 'technical', 'client'] },
-    { id: 'documents', label: 'Dokumen Legal', icon: FileText, roles: ['super_admin', 'admin', 'technical', 'client'] },
+    { id: 'documents', label: 'Dokumen Legal', icon: FileText, roles: ['super_admin', 'admin', 'technical', 'client', 'notary'] },
     { id: 'approvals', label: 'Persetujuan', icon: CheckSquare, badge: pendingApprovalsCount, roles: ['super_admin', 'admin', 'technical'] },
     { id: 'calendar', label: 'Kalender & Deadline', icon: Calendar, roles: ['super_admin', 'admin', 'technical'] },
     { id: 'finance', label: 'Keuangan & Invoice', icon: CreditCard, roles: ['super_admin', 'admin', 'finance'] },

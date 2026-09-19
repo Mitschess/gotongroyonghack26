@@ -20,6 +20,7 @@ import {
   LayoutDashboard
 } from 'lucide-react';
 import { UserRole } from '../types/legal';
+import { canAccessTab } from '../lib/iam';
 
 interface MobileNavProps {
   activeTab: string;
@@ -37,14 +38,17 @@ export default function MobileNav({
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   const primaryMobileTabs = [
-    { id: 'todays_actions', label: 'Tindakan', icon: Zap, roles: ['super_admin', 'admin', 'technical'] },
-    { id: 'workorders', label: 'Work Order', icon: FolderKanban, roles: ['super_admin', 'admin', 'technical', 'client'] },
-    { id: 'whatsapp', label: 'WA Proxy', icon: MessageSquare, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'] },
-    { id: 'ai', label: 'AI Suite', icon: Sparkles, roles: ['super_admin', 'admin', 'technical'] },
+    { id: 'todays_actions', label: 'Tindakan', icon: Zap },
+    { id: 'notary_tasks', label: 'Tugas Notaris', icon: Zap },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'workorders', label: 'Work Order', icon: FolderKanban },
+    { id: 'whatsapp', label: 'WA Proxy', icon: MessageSquare },
+    { id: 'ai', label: 'AI Suite', icon: Sparkles },
   ];
 
   const moreMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'workorders', label: 'Work Orders', icon: FolderKanban },
     { id: 'clients', label: 'Klien & Perusahaan', icon: Users },
     { id: 'services', label: 'Layanan Legalitas', icon: BookOpen },
     { id: 'documents', label: 'Dokumen Legal', icon: FileText },
@@ -53,9 +57,11 @@ export default function MobileNav({
     { id: 'finance', label: 'Keuangan & Invoice', icon: CreditCard },
     { id: 'reports', label: 'Laporan', icon: BarChart3 },
     { id: 'audit', label: 'Audit Trail', icon: ShieldAlert },
+    { id: 'public_form', label: 'Back Data & ZIP Notaris', icon: Sparkles },
   ];
 
-  const filteredPrimaryTabs = primaryMobileTabs.filter(t => t.roles.includes(userRole));
+  const filteredPrimaryTabs = primaryMobileTabs.filter(t => canAccessTab(userRole, t.id)).slice(0, 4);
+  const filteredMoreMenuItems = moreMenuItems.filter(item => canAccessTab(userRole, item.id));
 
   return (
     <>
@@ -112,7 +118,7 @@ export default function MobileNav({
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              {moreMenuItems.map((item) => {
+              {filteredMoreMenuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
                 return (

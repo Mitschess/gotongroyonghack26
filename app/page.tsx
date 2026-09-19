@@ -177,7 +177,7 @@ export default function Home() {
 
     // Switch default active tab based on role
     if (selectedUser.role === 'client') {
-      setActiveTab('client_portal');
+      setActiveTab('dashboard');
     } else if (selectedUser.role === 'notary') {
       setActiveTab('notary_tasks');
     } else if (activeTab === 'client_portal' || activeTab === 'notary_tasks') {
@@ -524,7 +524,7 @@ export default function Home() {
           setCurrentUser(user);
           setIsAuthenticated(true);
           if (user.role === 'client') {
-            setActiveTab('client_portal');
+            setActiveTab('dashboard');
           } else if (user.role === 'notary') {
             setActiveTab('notary_tasks');
           } else if (user.role === 'finance') {
@@ -644,6 +644,7 @@ export default function Home() {
               approvals={approvals}
               activityLogs={activityLogs}
               users={users}
+              currentUser={currentUser}
               onNavigateTab={(tab) => setActiveTab(tab)}
               onSelectWorkOrder={(wo) => {
                 setSelectedWoFromDashboard(wo);

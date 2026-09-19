@@ -14,7 +14,7 @@ import {
   Zap,
   Activity,
 } from 'lucide-react';
-import { WorkOrder, Client, Task, ApprovalRequest, ActivityLog, User } from '../types/legal';
+import { WorkOrder, Client, Task, ApprovalRequest, ActivityLog, User, UserRole } from '../types/legal';
 
 interface DashboardViewProps {
   workOrders: WorkOrder[];
@@ -23,6 +23,7 @@ interface DashboardViewProps {
   approvals: ApprovalRequest[];
   activityLogs: ActivityLog[];
   users: User[];
+  currentUser: User;
   onNavigateTab: (tab: string) => void;
   onSelectWorkOrder: (wo: WorkOrder) => void;
 }
@@ -104,11 +105,30 @@ export default function DashboardView({
   approvals,
   activityLogs,
   users,
+  currentUser,
   onNavigateTab,
   onSelectWorkOrder
 }: DashboardViewProps) {
-  const activeProjects = workOrders.filter(w => w.status === 'In Progress' || w.status === 'Review' || w.status === 'To Do');
-  const completedProjects = workOrders.filter(w => w.status === 'Completed');
+  // IAM-based data scoping
+  const isClient = currentUser.role === 'client';
+  const isNotary = currentUser.role === 'notary';
+  const isStaff = !isClient && !isNotary;
+
+  // Filter WOs based on role
+  const scopedWorkOrders = isClient
+    ? workOrders.filter(w => w.clientId === currentUser.linkedClientId)
+    : isNotary
+    ? workOrders.filter(w => w.notaryId === currentUser.id)
+    : workOrders;
+
+  const [selectedTimelineWoId, setSelectedTimelineWoId] = React.useState<string>(scopedWorkOrders[0]?.id || workOrders[0]?.id);
+  const activeTimelineWo = (isClient || isNotary)
+    ? scopedWorkOrders.find(w => w.id === selectedTimelineWoId) || scopedWorkOrders[0]
+    : workOrders.find(w => w.id === selectedTimelineWoId) || workOrders[0];
+  const timelineOrders = isClient || isNotary ? scopedWorkOrders : workOrders;
+
+  const activeProjects = scopedWorkOrders.filter(w => w.status === 'In Progress' || w.status === 'Review' || w.status === 'To Do');
+  const completedProjects = scopedWorkOrders.filter(w => w.status === 'Completed');
   const pendingApprovals = approvals.filter(a => a.status === 'Pending');
   
   const todayStr = '2026-09-19';
@@ -149,46 +169,73 @@ export default function DashboardView({
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold mb-2 bg-indigo-50 text-indigo-700 border border-indigo-100">
-              <Zap className="h-3.5 w-3.5 text-indigo-600" /> Live — Monitoring Operasional Legal
+              <Zap className="h-3.5 w-3.5 text-indigo-600" />
+              {isClient ? 'Client Portal — Status Proyek Legalitas Anda' : isNotary ? 'Notary Portal — Penugasan Akta & Dokumen' : 'Live — Monitoring Operasional Legal'}
             </div>
-            <h2 className="text-xl md:text-2xl font-black tracking-tight text-slate-900">Legal Work Management</h2>
+            <h2 className="text-xl md:text-2xl font-black tracking-tight text-slate-900">
+              {isClient ? `Halo, ${currentUser.name.split('(')[0].trim()} 👋` : isNotary ? `Notaris Dashboard` : 'Legal Work Management'}
+            </h2>
             <p className="text-xs md:text-sm mt-1 text-slate-500 max-w-xl">
-              Pusat kendali berkas, proyek legalitas, approval hirarki, dan pemantauan deadline perusahaan secara terstruktur.
+              {isClient
+                ? 'Pantau status dan perkembangan seluruh proyek legalitas perusahaan Anda secara real-time.'
+                : isNotary
+                ? 'Tampilan penugasan akta, minuta, dan Work Order yang membutuhkan tindakan notaris.'
+                : 'Pusat kendali berkas, proyek legalitas, approval hirarki, dan pemantauan deadline perusahaan secara terstruktur.'}
             </p>
           </div>
           <button
             onClick={() => onNavigateTab('workorders')}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-xs font-bold bg-indigo-600 hover:bg-indigo-700 transition-all shrink-0 shadow-xs"
           >
-            <FolderKanban className="h-4 w-4" /> Kelola Work Order
+            <FolderKanban className="h-4 w-4" /> {isClient ? 'Lihat Order Saya' : 'Kelola Work Order'}
           </button>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        {cards.map((card) => (
-          <div
-            key={card.label}
-            onClick={() => onNavigateTab(card.tab)}
-            className="cursor-pointer rounded-xl p-4 bg-white border border-slate-200 shadow-xs hover:shadow-md hover:border-indigo-300 transition-all relative overflow-hidden group"
-          >
-            {/* Top accent bar */}
-            <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl" style={{ background: card.iconColor }} />
-            
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{card.label}</span>
-              <div className="p-1.5 rounded-lg" style={{ background: card.iconBg }}>
-                <card.Icon className="h-3.5 w-3.5" style={{ color: card.iconColor }} />
+      {/* KPI Cards — Staff/Admin only */}
+      {isStaff && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {cards.map((card) => (
+            <div
+              key={card.label}
+              onClick={() => onNavigateTab(card.tab)}
+              className="cursor-pointer rounded-xl p-4 bg-white border border-slate-200 shadow-xs hover:shadow-md hover:border-indigo-300 transition-all relative overflow-hidden group"
+            >
+              {/* Top accent bar */}
+              <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl" style={{ background: card.iconColor }} />
+              
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{card.label}</span>
+                <div className="p-1.5 rounded-lg" style={{ background: card.iconBg }}>
+                  <card.Icon className="h-3.5 w-3.5" style={{ color: card.iconColor }} />
+                </div>
               </div>
+              <p className="text-2xl font-black text-slate-900">{card.value}</p>
+              <p className="mt-1 text-[10px] font-semibold flex items-center gap-1" style={{ color: card.subColor }}>
+                <TrendingUp className="h-3 w-3" /> {card.sub}
+              </p>
             </div>
-            <p className="text-2xl font-black text-slate-900">{card.value}</p>
-            <p className="mt-1 text-[10px] font-semibold flex items-center gap-1" style={{ color: card.subColor }}>
-              <TrendingUp className="h-3 w-3" /> {card.sub}
-            </p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
+
+      {/* Client KPI mini strip */}
+      {(isClient || isNotary) && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { label: 'Order Berjalan', value: activeProjects.length, color: '#4F46E5', bg: '#EEF2FF' },
+            { label: 'Order Selesai', value: completedProjects.length, color: '#059669', bg: '#ECFDF5' },
+            { label: 'Total Proyek', value: scopedWorkOrders.length, color: '#0891B2', bg: '#ECFEFF' },
+            { label: 'Deadline Aktif', value: scopedWorkOrders.filter(w => w.status !== 'Completed').length, color: '#D97706', bg: '#FFFBEB' },
+          ].map((item) => (
+            <div key={item.label} className="rounded-xl p-4 bg-white border border-slate-200 shadow-xs relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl" style={{ background: item.color }} />
+              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-2">{item.label}</p>
+              <p className="text-2xl font-black" style={{ color: item.color }}>{item.value}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -210,7 +257,7 @@ export default function DashboardView({
             </div>
 
             <div className="divide-y divide-slate-100">
-              {workOrders.map((wo) => {
+              {scopedWorkOrders.map((wo) => {
                 const sc = statusColor[wo.status] || statusColor['To Do'];
                 const pc = priorityColor[wo.priority] || priorityColor['Medium'];
                 return (
@@ -256,7 +303,97 @@ export default function DashboardView({
             </div>
           </div>
 
-          {/* Workload Summary */}
+          {/* Client Timeline Tracker embedded inside Dashboard */}
+          <div className="rounded-2xl bg-white border border-slate-200 shadow-xs p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-indigo-600" /> Client Timeline Tracker (Real-Time SLA & Progress)
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">Pantau alur tahapan pengerjaan legalitas secara transparan</p>
+              </div>
+
+              {timelineOrders.length > 0 && (
+                <div className="text-xs">
+                  <span className="text-slate-400 font-medium mr-1.5">{isClient ? 'Order Anda:' : 'Pilih Perusahaan:'}</span>
+                  <select
+                    value={selectedTimelineWoId}
+                    onChange={(e) => setSelectedTimelineWoId(e.target.value)}
+                    className="border border-slate-200 rounded-lg px-2.5 py-1 font-bold text-slate-800 bg-slate-50 focus:bg-white text-xs outline-none"
+                  >
+                    {timelineOrders.map((w) => (
+                      <option key={w.id} value={w.id}>
+                        {w.clientName} ({w.woNumber})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            {activeTimelineWo && (
+              <div className="space-y-4">
+                {/* Header Summary Card */}
+                <div className="rounded-xl bg-slate-50 p-4 border border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+                  <div>
+                    <span className="font-mono font-black text-indigo-600">{activeTimelineWo.woNumber}</span>
+                    <h4 className="text-sm font-black text-slate-900 mt-0.5">{activeTimelineWo.clientName}</h4>
+                    <p className="text-slate-500 font-medium">{activeTimelineWo.serviceName}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Progres Total</span>
+                    <span className="text-lg font-black text-indigo-600">{activeTimelineWo.progressPercent}%</span>
+                    <span className="block text-[10px] text-emerald-600 font-bold mt-0.5">SLA Deadline: {activeTimelineWo.deadline}</span>
+                  </div>
+                </div>
+
+                {/* Timeline Step Indicators */}
+                <div className="relative pl-4 space-y-3 before:absolute before:left-6 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200">
+                  {activeTimelineWo.workflow.map((st, idx) => {
+                    const isCompleted = st.status === 'Completed';
+                    const isInProgress = st.status === 'In Progress';
+                    return (
+                      <div key={st.stageId} className="relative flex items-start gap-3.5 z-10">
+                        <div className={`h-5 w-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-black ${
+                          isCompleted
+                            ? 'bg-emerald-500 text-white shadow-xs'
+                            : isInProgress
+                            ? 'bg-indigo-600 text-white ring-4 ring-indigo-100 shadow-md animate-pulse'
+                            : 'bg-slate-200 text-slate-500'
+                        }`}>
+                          {isCompleted ? '✓' : idx + 1}
+                        </div>
+                        <div className={`flex-1 rounded-xl p-3 border transition-all ${
+                          isInProgress 
+                            ? 'bg-indigo-50/60 border-indigo-200 shadow-xs' 
+                            : 'bg-white border-slate-100'
+                        }`}>
+                          <div className="flex items-center justify-between gap-2">
+                            <p className={`text-xs font-bold ${isInProgress ? 'text-indigo-900' : 'text-slate-800'}`}>
+                              {st.stageName}
+                            </p>
+                            <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
+                              isCompleted ? 'bg-emerald-100 text-emerald-800' : isInProgress ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-100 text-slate-500'
+                            }`}>
+                              {st.status}
+                            </span>
+                          </div>
+                          {st.completedAt && (
+                            <p className="text-[10px] text-slate-400 mt-1 font-medium">
+                              Selesai pada: {st.completedAt} oleh {st.completedBy}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Workload Summary — Staff only */}
+          {isStaff && (
           <div className="rounded-2xl bg-white border border-slate-200 shadow-xs">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
               <div>
@@ -294,11 +431,13 @@ export default function DashboardView({
               ))}
             </div>
           </div>
+          )}
         </div>
 
         {/* Right Column */}
         <div className="space-y-4">
-          {/* Pending Approvals */}
+          {/* Pending Approvals — Staff only */}
+          {isStaff && (
           <div className="rounded-2xl bg-white border border-slate-200 shadow-xs">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
               <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900">
@@ -335,6 +474,7 @@ export default function DashboardView({
               )}
             </div>
           </div>
+          )}
 
           {/* Activity Timeline */}
           <div className="rounded-2xl bg-white border border-slate-200 shadow-xs">

@@ -171,39 +171,34 @@ export default function StandalonePublicFormPage() {
         ) : (
           <form onSubmit={handleSubmitForm} className="space-y-4">
             
-            {/* Question Card 1: Pilih Layanan Legalitas */}
+            {/* Question Card 1: Pilih Layanan Legalitas (Dropdown) */}
             <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/80 space-y-4">
               <div className="space-y-1">
                 <label className="text-base font-medium text-slate-900 block">
                   Pilih Layanan Legalitas <span className="text-red-500">*</span>
                 </label>
-                <p className="text-xs text-slate-500">Pilih salah satu jenis pengurusan legalitas yang dibutuhkan.</p>
+                <p className="text-xs text-slate-500">Pilih jenis pengurusan legalitas dari daftar dropdown di bawah ini.</p>
               </div>
 
-              <div className="space-y-3 pt-2">
-                {[
-                  { id: 'PENDIRIAN_PT', label: 'Pendirian PT (SLA Total 7 Hari)' },
-                  { id: 'PENDIRIAN_CV', label: 'Pendirian CV (SLA Total 7 Hari)' },
-                  { id: 'PENDIRIAN_PT_PERORANGAN', label: 'Pendirian PT Perorangan (SLA Max 2 Hari Express)' },
-                  { id: 'PERUBAHAN_PT', label: 'Perubahan PT (SLA Total 7 Hari)' },
-                  { id: 'PERUBAHAN_CV', label: 'Perubahan CV (SLA Total 7 Hari)' },
-                  { id: 'PERUBAHAN_PT_PERORANGAN', label: 'Perubahan PT Perorangan (SLA Max 2 Hari Express)' },
-                  { id: 'RUPS_TAHUNAN', label: 'RUPS Tahunan (SLA Max 5 Hari)' },
-                ].map((item) => (
-                  <label 
-                    key={item.id} 
-                    className="flex items-center gap-3 text-sm text-slate-800 cursor-pointer select-none py-1 hover:text-purple-900"
-                  >
-                    <input
-                      type="radio"
-                      name="legalFormType"
-                      checked={selectedFormType === item.id}
-                      onChange={() => setSelectedFormType(item.id as PublicLegalFormType)}
-                      className="h-4 w-4 text-purple-700 focus:ring-purple-500 border-slate-300"
-                    />
-                    <span>{item.label}</span>
-                  </label>
-                ))}
+              <div className="pt-2">
+                <select
+                  value={selectedFormType}
+                  onChange={(e) => setSelectedFormType(e.target.value as PublicLegalFormType)}
+                  className="w-full border border-slate-300 rounded-xl p-3.5 text-sm text-slate-900 bg-white focus:border-purple-700 focus:ring-2 focus:ring-purple-100 outline-none transition-all font-medium cursor-pointer shadow-xs"
+                >
+                  <option value="PENDIRIAN_PT">Pendirian PT (SLA Total 7 Hari)</option>
+                  <option value="PENDIRIAN_CV">Pendirian CV (SLA Total 7 Hari)</option>
+                  <option value="PENDIRIAN_PT_PERORANGAN">Pendirian PT Perorangan (SLA Max 2 Hari Express)</option>
+                  <option value="PERUBAHAN_PT">Perubahan PT (SLA Total 7 Hari)</option>
+                  <option value="PERUBAHAN_CV">Perubahan CV (SLA Total 7 Hari)</option>
+                  <option value="PERUBAHAN_PT_PERORANGAN">Perubahan PT Perorangan (SLA Max 2 Hari Express)</option>
+                  <option value="RUPS_TAHUNAN">RUPS Tahunan (SLA Max 5 Hari)</option>
+                </select>
+              </div>
+
+              <div className="text-xs text-purple-700 font-medium bg-purple-50 rounded-xl p-3 border border-purple-100 flex items-center gap-2">
+                <Info className="h-4 w-4 shrink-0 text-purple-700" />
+                <span>Ketentuan SLA: {getFormSlaInfo(selectedFormType)}</span>
               </div>
             </div>
 

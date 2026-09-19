@@ -78,20 +78,33 @@ export default function Header({
       <div className="flex items-center gap-2">
         {/* Quick Actions */}
         <div className="hidden sm:flex items-center gap-2">
-          <button
-            onClick={onOpenNewClient}
-            className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all"
-          >
-            <Building2 className="h-3.5 w-3.5 text-indigo-600" />
-            + Client
-          </button>
-          <button
-            onClick={onOpenNewWO}
-            className="flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-xs"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Buat Work Order
-          </button>
+          {['super_admin', 'admin', 'technical', 'finance'].includes(currentUser.role) && (
+            <button
+              onClick={onOpenNewClient}
+              className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
+            >
+              <Building2 className="h-3.5 w-3.5 text-indigo-600" />
+              + Client
+            </button>
+          )}
+          {['super_admin', 'admin', 'technical'].includes(currentUser.role) && (
+            <button
+              onClick={onOpenNewWO}
+              className="flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-xs cursor-pointer"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Buat Work Order
+            </button>
+          )}
+          {currentUser.role === 'client' && (
+            <button
+              onClick={() => onOpenNewWO()}
+              className="flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-xs cursor-pointer"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Lihat Order Saya
+            </button>
+          )}
         </div>
 
         {/* Divider */}
