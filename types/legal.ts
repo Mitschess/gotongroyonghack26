@@ -122,6 +122,7 @@ export type DocumentCategory =
   | 'Contract' 
   | 'Government Document' 
   | 'Supporting Document' 
+  | 'Notary Deliverable'
   | 'Other';
 
 export interface DocumentVersion {
@@ -193,6 +194,8 @@ export interface NotificationItem {
   read: boolean;
   type: 'task' | 'approval' | 'deadline' | 'system' | 'whatsapp';
   linkTarget?: string;
+  targetRoles?: UserRole[];
+  targetClientId?: string;
 }
 
 export interface WorkNote {

@@ -13,11 +13,13 @@ import {
   ChevronRight,
   Sparkles
 } from 'lucide-react';
-import { Service, Client } from '../types/legal';
+import { Service, Client, UserRole } from '../types/legal';
 
 interface ServicesViewProps {
   services: Service[];
   clients: Client[];
+  userRole?: UserRole;
+  currentUserId?: string;
   onAddService: (newService: Partial<Service>) => void;
   onRequestServiceSubmit: (clientId: string, serviceId: string, description: string) => void;
 }
@@ -25,6 +27,8 @@ interface ServicesViewProps {
 export default function ServicesView({
   services,
   clients,
+  userRole,
+  currentUserId,
   onAddService,
   onRequestServiceSubmit
 }: ServicesViewProps) {

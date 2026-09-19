@@ -23,7 +23,8 @@ import {
   Paperclip,
   TrendingUp,
   Check,
-  Edit2
+  Edit2,
+  Upload
 } from 'lucide-react';
 import { 
   WorkOrder, 
@@ -112,6 +113,11 @@ export default function WorkOrdersView({
     priority: 'Medium' as Priority,
     deadline: '2026-09-25'
   });
+
+  // Modal for Document Upload inside Drawer
+  const [showUploadDocModal, setShowUploadDocModal] = useState(false);
+  const [newDocTitle, setNewDocTitle] = useState('');
+  const [newDocCategory, setNewDocCategory] = useState<string>('Company Document');
 
   // Note input state
   const [newNoteText, setNewNoteText] = useState('');
@@ -639,12 +645,14 @@ export default function WorkOrdersView({
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">Daftar Tugas (Task Item)</h4>
-                      <button
-                        onClick={() => setShowAddTaskModal(true)}
-                        className="flex items-center gap-1 rounded-lg bg-indigo-600 text-white px-2.5 py-1 text-xs font-bold"
-                      >
-                        <Plus className="h-3.5 w-3.5" /> Tambah Task
-                      </button>
+                      {userRole !== 'client' && (
+                        <button
+                          onClick={() => setShowAddTaskModal(true)}
+                          className="flex items-center gap-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1 text-xs font-bold cursor-pointer"
+                        >
+                          <Plus className="h-3.5 w-3.5" /> Tambah Task
+                        </button>
+                      )}
                     </div>
 
                     <div className="space-y-3">
@@ -655,9 +663,9 @@ export default function WorkOrdersView({
                               <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100">{task.title}</h5>
                               <p className="mt-1 text-xs text-slate-500">{task.description}</p>
                             </div>
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                              task.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-500' :
-                              task.status === 'In Progress' ? 'bg-indigo-500/10 text-indigo-500' :
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                              task.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-600' :
+                              task.status === 'In Progress' ? 'bg-indigo-500/10 text-indigo-600' :
                               'bg-slate-100 dark:bg-slate-800 text-slate-400'
                             }`}>
                               {task.status}
@@ -667,16 +675,20 @@ export default function WorkOrdersView({
                           <div className="mt-3 flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px]">
                             <span className="text-slate-500">Assignee: <strong className="text-slate-800 dark:text-slate-200">{task.assigneeName}</strong></span>
                             
-                            <select
-                              value={task.status}
-                              onChange={(e) => onUpdateTaskStatus(task.id, e.target.value as Task['status'])}
-                              className="rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-bold text-slate-900 dark:text-slate-100 focus:outline-none"
-                            >
-                              <option value="To Do">To Do</option>
-                              <option value="In Progress">In Progress</option>
-                              <option value="Review">Review</option>
-                              <option value="Completed">Completed</option>
-                            </select>
+                            {userRole !== 'client' ? (
+                              <select
+                                value={task.status}
+                                onChange={(e) => onUpdateTaskStatus(task.id, e.target.value as Task['status'])}
+                                className="rounded bg-slate-100 dark:bg-slate-800 px-2 py-1 text-[10px] font-bold text-slate-900 dark:text-slate-100 focus:outline-none cursor-pointer"
+                              >
+                                <option value="To Do">To Do</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Review">Review</option>
+                                <option value="Completed">Completed</option>
+                              </select>
+                            ) : (
+                              <span className="text-[10px] font-bold text-slate-400">Mode Baca Saja (Client)</span>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -686,22 +698,57 @@ export default function WorkOrdersView({
 
                 {/* TAB 3: DOCUMENTS */}
                 {activeWoTab === 'documents' && (
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">Dokumen Terlampir</h4>
-                    {documents.filter(d => d.workOrderId === selectedWo.id).map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 p-3 bg-white dark:bg-slate-900">
-                        <div className="flex items-center gap-3">
-                          <FileText className="h-5 w-5 text-indigo-500" />
-                          <div>
-                            <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{doc.title}</p>
-                            <span className="text-[10px] text-slate-400">{doc.category} • Versi {doc.currentVersion} • {doc.fileSize}</span>
-                          </div>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">Dokumen Terlampir & Legal Deliverables</h4>
+                      <button
+                        onClick={() => setShowUploadDocModal(true)}
+                        className="flex items-center gap-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1 text-xs font-bold cursor-pointer shadow-xs"
+                      >
+                        <Plus className="h-3.5 w-3.5" /> Unggah Dokumen
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {documents.filter(d => d.workOrderId === selectedWo.id).length === 0 ? (
+                        <div className="p-6 text-center text-xs text-slate-400 border border-dashed rounded-xl">
+                          Belum ada dokumen terunggah untuk Work Order ini.
                         </div>
-                        <span className="rounded bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
-                          {doc.accessLevel}
-                        </span>
-                      </div>
-                    ))}
+                      ) : (
+                        documents.filter(d => d.workOrderId === selectedWo.id).map((doc) => (
+                          <div key={doc.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 bg-white dark:bg-slate-900 shadow-xs">
+                            <div className="flex items-start gap-3">
+                              <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 shrink-0 mt-0.5">
+                                <FileText className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{doc.title}</p>
+                                <p className="text-[10px] text-slate-400 mt-0.5">{doc.category} • Versi {doc.currentVersion} • {doc.fileSize}</p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 self-end sm:self-auto">
+                              <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-600">
+                                Terunggah
+                              </span>
+                              
+                              <button
+                                onClick={() => alert(`Pratinjau PDF: ${doc.title}`)}
+                                className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-bold hover:bg-slate-50 cursor-pointer"
+                              >
+                                Pratinjau
+                              </button>
+                              <button
+                                onClick={() => alert(`Mengunduh berkas: ${doc.title}`)}
+                                className="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-600 text-[11px] font-bold hover:bg-indigo-100 cursor-pointer"
+                              >
+                                Unduh
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -880,15 +927,108 @@ export default function WorkOrdersView({
                 <button
                   type="button"
                   onClick={() => setShowAddTaskModal(false)}
-                  className="rounded-lg border px-3 py-1.5 font-semibold"
+                  className="rounded-lg border px-3 py-1.5 font-semibold cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-indigo-600 text-white px-4 py-1.5 font-bold"
+                  className="rounded-lg bg-indigo-600 text-white px-4 py-1.5 font-bold cursor-pointer"
                 >
                   Simpan Task
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Upload Document */}
+      {showUploadDocModal && selectedWo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100">Unggah Dokumen Legalitas</h3>
+                <p className="text-xs text-slate-500">{selectedWo.clientName} ({selectedWo.woNumber})</p>
+              </div>
+              <button onClick={() => setShowUploadDocModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!newDocTitle) return;
+                documents.push({
+                  id: `doc-${Date.now()}`,
+                  docNumber: `DOC-2026-${Math.floor(100 + Math.random() * 900)}`,
+                  title: newDocTitle,
+                  category: newDocCategory as any,
+                  workOrderId: selectedWo.id,
+                  workOrderNumber: selectedWo.woNumber,
+                  clientId: selectedWo.clientId,
+                  clientName: selectedWo.clientName,
+                  uploadedBy: 'User Staff',
+                  uploadedAt: '2026-09-19',
+                  fileType: 'PDF',
+                  fileSize: '2.4 MB',
+                  accessLevel: 'Public',
+                  currentVersion: 1,
+                  versions: []
+                });
+                setShowUploadDocModal(false);
+                setNewDocTitle('');
+              }}
+              className="mt-4 space-y-4 text-xs"
+            >
+              <div>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Nama Dokumen / Berkas:</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Misal: Bukti Sewa Ruang Kantor & Domisili"
+                  value={newDocTitle}
+                  onChange={(e) => setNewDocTitle(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2.5 text-xs focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Kategori Dokumen:</label>
+                <select
+                  value={newDocCategory}
+                  onChange={(e) => setNewDocCategory(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2.5 text-xs focus:outline-none cursor-pointer"
+                >
+                  <option value="Identity">Identitas (KTP / NPWP / Passpor)</option>
+                  <option value="Company Document">Dokumen Pendirian (Akta / SK)</option>
+                  <option value="License">Perizinan Usaha / NIB</option>
+                  <option value="Supporting Document">Dokumen Pendukung (Sewa / Kredensial)</option>
+                  <option value="Notary Deliverable">Hasil Notaris & AHU</option>
+                </select>
+              </div>
+
+              <div className="p-4 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-center bg-slate-50/50 dark:bg-slate-950">
+                <Upload className="h-6 w-6 text-indigo-500 mx-auto mb-1" />
+                <p className="font-bold text-slate-700 dark:text-slate-300">Pilih Berkas PDF / Gambar</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">Maksimal ukuran file 15 MB</p>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowUploadDocModal(false)}
+                  className="rounded-xl border border-slate-200 dark:border-slate-800 px-4 py-2 font-semibold hover:bg-slate-100 cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 font-bold shadow-md cursor-pointer"
+                >
+                  Unggah Berkas Sekarang
                 </button>
               </div>
             </form>

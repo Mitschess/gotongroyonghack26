@@ -11,6 +11,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { User, UserRole, NotificationItem } from '../types/legal';
+import { scopeNotifications } from '../lib/iam';
 
 interface HeaderProps {
   currentUser: User;
@@ -42,7 +43,8 @@ export default function Header({
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const scopedNotifications = scopeNotifications(notifications, currentUser);
+  const unreadCount = scopedNotifications.filter(n => !n.read).length;
 
   const roleColors: Record<UserRole, { bg: string; text: string; border: string }> = {
     'super_admin': { bg: '#EEF2FF', text: '#4F46E5', border: '#C7D2FE' },
@@ -142,10 +144,10 @@ export default function Header({
               </div>
 
               <div className="mt-3 max-h-72 overflow-y-auto divide-y divide-slate-100 pr-1">
-                {notifications.length === 0 ? (
+                {scopedNotifications.length === 0 ? (
                   <p className="py-6 text-center text-xs text-slate-500">Tidak ada notifikasi saat ini.</p>
                 ) : (
-                  notifications.map((notif) => (
+                  scopedNotifications.map((notif) => (
                     <div
                       key={notif.id}
                       onClick={() => onMarkNotificationRead(notif.id)}

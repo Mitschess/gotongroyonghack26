@@ -1,4 +1,4 @@
-import { User, UserRole, WorkOrder, LegalDocument, Invoice, Task } from '../types/legal';
+import { User, UserRole, WorkOrder, LegalDocument, Invoice, Task, NotificationItem } from '../types/legal';
 
 export interface MenuItemPermission {
   id: string;
@@ -6,16 +6,16 @@ export interface MenuItemPermission {
   roles: UserRole[];
 }
 
-// Master IAM Access Matrix across all LexiFlow tabs
+// Master IAM Access Matrix across all Waktunya Legal tabs
 export const IAM_TAB_PERMISSIONS: Record<string, UserRole[]> = {
   todays_actions: ['super_admin', 'admin', 'technical'],
-  public_form:    ['notary'],
+  public_form:    ['super_admin', 'admin'],
   whatsapp:       ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'],
   notary_tasks:   ['notary'],
   dashboard:      ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'],
   workorders:     ['super_admin', 'admin', 'technical', 'client', 'notary'],
   clients:        ['super_admin', 'admin', 'technical', 'finance'],
-  services:       ['super_admin', 'admin', 'technical', 'client'],
+  services:       ['super_admin', 'admin', 'client'],
   approvals:      ['super_admin', 'admin', 'technical'],
   calendar:       ['super_admin', 'admin', 'technical'],
   finance:        ['super_admin', 'admin', 'finance'],
@@ -157,4 +157,29 @@ export function canManageFinance(role: UserRole): boolean {
 
 export function canManageServices(role: UserRole): boolean {
   return ['super_admin', 'admin', 'technical'].includes(role);
+}
+
+/**
+ * Role-Based Scoping for Notifications
+ */
+export function scopeNotifications(notifications: NotificationItem[], user: User): NotificationItem[] {
+  if (!user) return [];
+  return notifications.filter(notif => {
+    if (notif.targetRoles && notif.targetRoles.length > 0) {
+      if (!notif.targetRoles.includes(user.role)) return false;
+    }
+    if (user.role === 'client') {
+      if (notif.targetClientId && notif.targetClientId !== user.linkedClientId) return false;
+      if (!notif.targetRoles && (notif.type === 'approval' || notif.type === 'task')) return false;
+    }
+    if (user.role === 'notary') {
+      if (notif.type === 'approval' && !notif.targetRoles?.includes('notary')) return false;
+    }
+    if (user.role === 'finance') {
+      if (notif.type === 'task' || notif.type === 'approval') {
+        if (!notif.targetRoles?.includes('finance')) return false;
+      }
+    }
+    return true;
+  });
 }

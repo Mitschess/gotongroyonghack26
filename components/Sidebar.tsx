@@ -21,7 +21,8 @@ import {
   FileCheck2,
   ChevronRight,
   ChevronDown,
-  Layers
+  Layers,
+  LogOut
 } from 'lucide-react';
 import { UserRole } from '../types/legal';
 
@@ -30,6 +31,7 @@ interface SidebarProps {
   setActiveTab: (tab: string) => void;
   pendingApprovalsCount: number;
   userRole: UserRole;
+  onLogout?: () => void;
 }
 
 interface MenuItem {
@@ -50,7 +52,8 @@ export default function Sidebar({
   activeTab,
   setActiveTab,
   pendingApprovalsCount,
-  userRole
+  userRole,
+  onLogout
 }: SidebarProps) {
   const isStaffRole = ['super_admin', 'admin', 'technical'].includes(userRole);
 
@@ -70,17 +73,17 @@ export default function Sidebar({
       items: [
         { id: 'workorders', label: 'Work Orders', icon: FolderKanban, roles: ['super_admin', 'admin', 'technical', 'client', 'notary'] },
         { id: 'clients', label: 'Klien & Perusahaan', icon: Users, roles: ['super_admin', 'admin', 'technical', 'finance'] },
-        { id: 'services', label: 'Layanan Legalitas', icon: BookOpen, roles: ['super_admin', 'admin', 'technical', 'client'] },
+        { id: 'services', label: 'Layanan Legalitas', icon: BookOpen, roles: ['super_admin', 'admin', 'client'] },
         { id: 'approvals', label: 'Persetujuan', icon: CheckSquare, badge: pendingApprovalsCount, roles: ['super_admin', 'admin', 'technical'] },
         { id: 'whatsapp', label: 'WA Proxy Hub', icon: MessageSquare, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'] },
       ]
     },
     {
-      groupLabel: 'Notaris',
+      groupLabel: 'Notaris & Data',
       defaultOpen: true,
       items: [
         { id: 'notary_tasks', label: 'Tugas Notaris', icon: FileCheck2, roles: ['notary'] },
-        { id: 'public_form', label: 'Back Data & ZIP', icon: Archive, roles: ['notary'] },
+        { id: 'public_form', label: 'Back Data & ZIP', icon: Archive, roles: ['super_admin', 'admin'] },
       ]
     },
     {
@@ -104,11 +107,10 @@ export default function Sidebar({
   const flatMenuItems: MenuItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'] },
     { id: 'workorders', label: 'Work Orders', icon: FolderKanban, roles: ['super_admin', 'admin', 'technical', 'client', 'notary'] },
-    { id: 'services', label: 'Layanan Legalitas', icon: BookOpen, roles: ['super_admin', 'admin', 'technical', 'client'] },
+    { id: 'services', label: 'Layanan Legalitas', icon: BookOpen, roles: ['super_admin', 'admin', 'client'] },
     { id: 'whatsapp', label: 'WA Proxy Hub', icon: MessageSquare, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'] },
     { id: 'clients', label: 'Klien & Perusahaan', icon: Users, roles: ['super_admin', 'admin', 'technical', 'finance'] },
     { id: 'notary_tasks', label: 'Tugas Notaris', icon: FileCheck2, roles: ['notary'] },
-    { id: 'public_form', label: 'Back Data & ZIP', icon: Archive, roles: ['notary'] },
     { id: 'finance', label: 'Invoice & Billing', icon: CreditCard, roles: ['finance'] },
     { id: 'reports', label: 'Laporan', icon: BarChart3, roles: ['super_admin', 'admin', 'finance'] },
     { id: 'client_portal', label: 'Portal Klien', icon: Layers, roles: ['client'] },
@@ -179,7 +181,7 @@ export default function Sidebar({
         </div>
         <div>
           <h1 className="text-[13px] font-extrabold tracking-tight text-slate-900 flex items-center gap-1.5">
-            LexiFlow
+            Waktunya Legal
             <span 
               className="text-[8px] font-extrabold uppercase tracking-widest px-1 rounded bg-indigo-50 text-indigo-600 border border-indigo-200"
             >
@@ -237,17 +239,15 @@ export default function Sidebar({
         )}
       </div>
 
-      {/* Footer Status */}
+      {/* Footer Logout Button */}
       <div className="p-2.5 shrink-0 border-t border-slate-100">
-        <div className="rounded-lg p-2.5 bg-slate-50 border border-slate-100">
-          <div className="flex items-center gap-1.5 text-[11px] font-bold text-indigo-600">
-            <Sparkles className="h-3 w-3" />
-            <span>Gotong Royong AI</span>
-          </div>
-          <p className="mt-0.5 text-[9px] text-slate-400 leading-tight">
-            OCR, WA Proxy & Workflow.
-          </p>
-        </div>
+        <button
+          onClick={onLogout}
+          className="flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all cursor-pointer border border-slate-200/80 dark:border-slate-800"
+        >
+          <LogOut className="h-4 w-4 text-slate-400 group-hover:text-red-600" />
+          <span>Keluar (Log Out)</span>
+        </button>
       </div>
     </aside>
   );

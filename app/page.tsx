@@ -177,13 +177,10 @@ export default function Home() {
     setCurrentUser(selectedUser);
     logActivity('Switch User Role', `Beralih ke role ${selectedUser.role} (${selectedUser.name})`);
 
-    // Switch default active tab based on role
-    if (selectedUser.role === 'client') {
-      setActiveTab('dashboard');
-    } else if (selectedUser.role === 'notary') {
-      setActiveTab('notary_tasks');
-    } else if (activeTab === 'client_portal' || activeTab === 'notary_tasks') {
-      setActiveTab('todays_actions');
+    // Auto switch active tab if selected user role cannot access current tab
+    if (!canAccessTab(selectedUser.role, activeTab)) {
+      const landingTab = IAM_DEFAULT_LANDING[selectedUser.role] || 'dashboard';
+      setActiveTab(landingTab);
     }
   };
 

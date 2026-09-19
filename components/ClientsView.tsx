@@ -14,9 +14,11 @@ import {
   FolderKanban, 
   X, 
   ExternalLink,
-  Briefcase
+  Briefcase,
+  CheckCircle2
 } from 'lucide-react';
 import { Client, ClientType, WorkOrder, LegalDocument } from '../types/legal';
+import ClientDocumentDrawer from './ClientDocumentDrawer';
 
 interface ClientsViewProps {
   clients: Client[];
@@ -24,6 +26,8 @@ interface ClientsViewProps {
   documents: LegalDocument[];
   onAddClient: (newClient: Partial<Client>) => void;
   onSelectWorkOrder: (wo: WorkOrder) => void;
+  onSendWhatsappMessage?: (msg: any) => void;
+  onUploadDocument?: (doc: Partial<LegalDocument>) => void;
 }
 
 export default function ClientsView({
@@ -31,11 +35,14 @@ export default function ClientsView({
   workOrders,
   documents,
   onAddClient,
-  onSelectWorkOrder
+  onSelectWorkOrder,
+  onSendWhatsappMessage,
+  onUploadDocument
 }: ClientsViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [drawerClient, setDrawerClient] = useState<Client | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
 
   const [formState, setFormState] = useState({

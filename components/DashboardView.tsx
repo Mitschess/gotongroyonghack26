@@ -485,43 +485,45 @@ export default function DashboardView({
               </div>
             )}
 
-            {/* Activity Timeline — Staff / Notary only */}
-            <div className="rounded-2xl bg-white border border-slate-200 shadow-xs">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-                <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900">
-                  <Activity className="h-4 w-4 text-indigo-600" />
-                  Activity Feed
-                </h3>
-                <button onClick={() => onNavigateTab('audit')}
-                  className="text-xs font-semibold text-slate-500 hover:text-slate-900 cursor-pointer">
-                  Audit Trail
-                </button>
-              </div>
+            {/* Activity Timeline — Staff only */}
+            {isStaff && (
+              <div className="rounded-2xl bg-white border border-slate-200 shadow-xs">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                  <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900">
+                    <Activity className="h-4 w-4 text-indigo-600" />
+                    Activity Feed
+                  </h3>
+                  <button onClick={() => onNavigateTab('audit')}
+                    className="text-xs font-semibold text-slate-500 hover:text-slate-900 cursor-pointer">
+                    Audit Trail
+                  </button>
+                </div>
 
-              <div className="p-4 space-y-3.5">
-                {activityLogs.slice(0, 5).map((log, idx) => (
-                  <div key={log.id} className="flex items-start gap-3 text-xs">
-                    <div className={`flex h-6 w-6 items-center justify-center rounded-full text-[9px] font-black text-white shrink-0 mt-0.5 ${
-                      idx % 2 === 0 ? 'bg-indigo-600' : 'bg-purple-600'
-                    }`}>
-                      {log.userName.substring(0, 1)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-1">
-                        <span className="font-bold truncate text-slate-900">{log.userName}</span>
-                        <span className="text-[9px] shrink-0 text-slate-400">
-                          {log.timestamp.split(' ')[1] || log.timestamp}
-                        </span>
+                <div className="p-4 space-y-3.5">
+                  {activityLogs.slice(0, 5).map((log, idx) => (
+                    <div key={log.id} className="flex items-start gap-3 text-xs">
+                      <div className={`flex h-6 w-6 items-center justify-center rounded-full text-[9px] font-black text-white shrink-0 mt-0.5 ${
+                        idx % 2 === 0 ? 'bg-indigo-600' : 'bg-purple-600'
+                      }`}>
+                        {log.userName.substring(0, 1)}
                       </div>
-                      <p className="mt-0.5 leading-tight text-slate-500">
-                        <span className="font-semibold text-indigo-600">{log.action}:</span>{' '}
-                        {log.targetObject}
-                      </p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="font-bold truncate text-slate-900">{log.userName}</span>
+                          <span className="text-[9px] shrink-0 text-slate-400">
+                            {log.timestamp.split(' ')[1] || log.timestamp}
+                          </span>
+                        </div>
+                        <p className="mt-0.5 leading-tight text-slate-500">
+                          <span className="font-semibold text-indigo-600">{log.action}:</span>{' '}
+                          {log.targetObject}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}
