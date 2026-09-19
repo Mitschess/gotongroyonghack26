@@ -128,7 +128,7 @@ export default function StandalonePublicFormPage() {
           
           <div className="p-6 sm:p-8 space-y-4">
             <h1 className="text-2xl sm:text-3xl font-normal text-slate-900 tracking-tight">
-              Form Legalitas Klien & Exporter Notaris ZIP
+              Form Legalitas Klien
             </h1>
             
             <p className="text-sm text-slate-600 leading-relaxed">
