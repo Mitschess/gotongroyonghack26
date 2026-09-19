@@ -96,7 +96,7 @@ export default function ReportsView({
             className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2 font-semibold text-slate-900 dark:text-slate-100 focus:outline-none"
           >
             <option value="all">Semua Legal Staff</option>
-            {users.filter(u => u.role === 'Legal Staff' || u.role === 'Manager/Supervisor').map(u => (
+            {users.filter(u => u.role === 'technical' || u.role === 'admin' || u.role === 'super_admin').map(u => (
               <option key={u.id} value={u.id}>{u.name}</option>
             ))}
           </select>

@@ -114,9 +114,9 @@ export default function Home() {
     logActivity('Switch User Role', `Beralih ke role ${selectedUser.role} (${selectedUser.name})`);
 
     // Switch default active tab based on role
-    if (selectedUser.role === 'Client') {
+    if (selectedUser.role === 'client') {
       setActiveTab('client_portal');
-    } else if (selectedUser.role === 'Notary') {
+    } else if (selectedUser.role === 'notary') {
       setActiveTab('notary_tasks');
     } else if (activeTab === 'client_portal' || activeTab === 'notary_tasks') {
       setActiveTab('todays_actions');
@@ -364,7 +364,7 @@ export default function Home() {
       workOrderTitle: `${wo?.serviceName} (${wo?.clientName})`,
       requestedBy: currentUser.name,
       requestedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      targetApproverRole: 'Manager/Supervisor',
+      targetApproverRole: 'admin',
       type,
       status: 'Pending',
       notes: `Mohon persetujuan ${type} dari Manager.`

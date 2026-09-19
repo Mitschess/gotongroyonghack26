@@ -35,7 +35,7 @@ export default function LoginPage({ users, onLogin }: LoginPageProps) {
   const [showMfa, setShowMfa] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [ssoProvider, setSsoProvider] = useState<string | null>(null);
-  const [selectedRole, setSelectedRole] = useState<UserRole>('Manager/Supervisor');
+  const [selectedRole, setSelectedRole] = useState<UserRole>('admin');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,7 +134,7 @@ export default function LoginPage({ users, onLogin }: LoginPageProps) {
               <div className="space-y-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => handleSsoLogin('Google Workspace IAM', 'Manager/Supervisor')}
+                  onClick={() => handleSsoLogin('Google Workspace IAM', 'admin')}
                   disabled={isLoading}
                   className="w-full py-2.5 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs flex items-center justify-between transition-all group shadow-xs"
                 >
@@ -152,7 +152,7 @@ export default function LoginPage({ users, onLogin }: LoginPageProps) {
 
                 <button
                   type="button"
-                  onClick={() => handleSsoLogin('Microsoft Entra ID', 'Super Admin')}
+                  onClick={() => handleSsoLogin('Microsoft Entra ID', 'super_admin')}
                   disabled={isLoading}
                   className="w-full py-2.5 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs flex items-center justify-between transition-all group shadow-xs"
                 >
@@ -170,7 +170,7 @@ export default function LoginPage({ users, onLogin }: LoginPageProps) {
 
                 <button
                   type="button"
-                  onClick={() => handleSsoLogin('Okta IAM Provider', 'Legal Staff')}
+                  onClick={() => handleSsoLogin('Okta IAM Provider', 'technical')}
                   disabled={isLoading}
                   className="w-full py-2.5 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs flex items-center justify-between transition-all group shadow-xs"
                 >

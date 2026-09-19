@@ -37,7 +37,8 @@ export default function ApprovalsView({
     return statusFilter === 'all' || a.status === statusFilter;
   });
 
-  const isManagerOrAdmin = userRole === 'Manager/Supervisor' || userRole === 'Super Admin';
+  const isManagerOrAdmin = userRole === 'admin' || userRole === 'super_admin';
+
 
   const handleAction = (status: ApprovalStatus) => {
     if (!selectedApproval) return;

@@ -1,11 +1,11 @@
 export type UserRole = 
-  | 'Super Admin' 
-  | 'Manager/Supervisor' 
-  | 'Legal Staff' 
-  | 'Admin' 
-  | 'Finance' 
-  | 'Notary'
-  | 'Client';
+  | 'super_admin' 
+  | 'admin' 
+  | 'technical' 
+  | 'finance' 
+  | 'notary' 
+  | 'client';
+
 
 export interface User {
   id: string;

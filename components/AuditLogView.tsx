@@ -142,12 +142,12 @@ export default function AuditLogView({
                     </td>
                     <td className="py-3 px-4">{u.department}</td>
                     <td className="py-3 px-4 text-slate-500">
-                      {u.role === 'Super Admin' && 'Full Access All Modules'}
-                      {u.role === 'Manager/Supervisor' && 'Approval, Task Assignment, Reports, WO'}
-                      {u.role === 'Legal Staff' && 'View & Update Tasks, Upload Docs, Work Notes'}
-                      {u.role === 'Admin' && 'Client Reg, Service Requests, Administrative'}
-                      {u.role === 'Finance' && 'Billing, Invoicing, Payment Tracking'}
-                      {u.role === 'Client' && 'View My WO Status, View Documents'}
+                      {u.role === 'super_admin' && 'Full Access All Modules'}
+                      {u.role === 'admin' && 'Approval, Task Assignment, System Config'}
+                      {u.role === 'technical' && 'View & Update Tasks, Upload Docs, Technical Execution'}
+                      {u.role === 'finance' && 'Billing, Invoicing, Payment Tracking'}
+                      {u.role === 'notary' && 'View Assigned Tasks, Upload Notary Docs'}
+                      {u.role === 'client' && 'View My WO Status, View Documents'}
                     </td>
                   </tr>
                 ))}

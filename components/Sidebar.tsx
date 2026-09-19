@@ -37,21 +37,21 @@ export default function Sidebar({
   userRole
 }: SidebarProps) {
   const menuItems = [
-    { id: 'todays_actions', label: "Today's Actions", icon: Zap, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin'] },
-    { id: 'whatsapp', label: 'WA Proxy Hub', icon: MessageSquare, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin', 'Notary', 'Client'] },
-    { id: 'ai', label: 'AI Suite & OCR', icon: Wand2, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin'] },
-    { id: 'notary_tasks', label: 'Tugas Notaris', icon: FileCheck2, roles: ['Notary', 'Super Admin', 'Manager/Supervisor'] },
-    { id: 'client_portal', label: 'Client Timeline', icon: UserCheck, roles: ['Client', 'Super Admin'] },
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin', 'Finance', 'Client'] },
-    { id: 'workorders', label: 'Work Orders', icon: FolderKanban, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin', 'Client'] },
-    { id: 'clients', label: 'Klien & Perusahaan', icon: Users, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin', 'Finance'] },
-    { id: 'services', label: 'Layanan Legalitas', icon: BookOpen, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin', 'Client'] },
-    { id: 'documents', label: 'Dokumen Legal', icon: FileText, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin', 'Client'] },
-    { id: 'approvals', label: 'Persetujuan', icon: CheckSquare, badge: pendingApprovalsCount, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff'] },
-    { id: 'calendar', label: 'Kalender & Deadline', icon: Calendar, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin'] },
-    { id: 'finance', label: 'Keuangan & Invoice', icon: CreditCard, roles: ['Super Admin', 'Manager/Supervisor', 'Finance', 'Admin'] },
-    { id: 'reports', label: 'Laporan', icon: BarChart3, roles: ['Super Admin', 'Manager/Supervisor', 'Finance'] },
-    { id: 'audit', label: 'Audit Trail', icon: ShieldAlert, roles: ['Super Admin', 'Manager/Supervisor'] },
+    { id: 'todays_actions', label: "Today's Actions", icon: Zap, roles: ['super_admin', 'admin', 'technical'] },
+    { id: 'whatsapp', label: 'WA Proxy Hub', icon: MessageSquare, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'] },
+    { id: 'ai', label: 'AI Suite & OCR', icon: Wand2, roles: ['super_admin', 'admin', 'technical'] },
+    { id: 'notary_tasks', label: 'Tugas Notaris', icon: FileCheck2, roles: ['notary', 'super_admin', 'admin'] },
+    { id: 'client_portal', label: 'Client Timeline', icon: UserCheck, roles: ['client', 'super_admin'] },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'] },
+    { id: 'workorders', label: 'Work Orders', icon: FolderKanban, roles: ['super_admin', 'admin', 'technical', 'client'] },
+    { id: 'clients', label: 'Klien & Perusahaan', icon: Users, roles: ['super_admin', 'admin', 'technical', 'finance'] },
+    { id: 'services', label: 'Layanan Legalitas', icon: BookOpen, roles: ['super_admin', 'admin', 'technical', 'client'] },
+    { id: 'documents', label: 'Dokumen Legal', icon: FileText, roles: ['super_admin', 'admin', 'technical', 'client'] },
+    { id: 'approvals', label: 'Persetujuan', icon: CheckSquare, badge: pendingApprovalsCount, roles: ['super_admin', 'admin', 'technical'] },
+    { id: 'calendar', label: 'Kalender & Deadline', icon: Calendar, roles: ['super_admin', 'admin', 'technical'] },
+    { id: 'finance', label: 'Keuangan & Invoice', icon: CreditCard, roles: ['super_admin', 'admin', 'finance'] },
+    { id: 'reports', label: 'Laporan', icon: BarChart3, roles: ['super_admin', 'admin', 'finance'] },
+    { id: 'audit', label: 'Audit Trail', icon: ShieldAlert, roles: ['super_admin', 'admin'] },
   ];
 
   const filteredMenuItems = menuItems.filter(item => item.roles.includes(userRole));

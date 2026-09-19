@@ -115,7 +115,8 @@ export default function DashboardView({
   const dueToday = workOrders.filter(w => w.deadline === todayStr && w.status !== 'Completed');
   const overdue = workOrders.filter(w => w.deadline < todayStr && w.status !== 'Completed');
 
-  const staffMembers = users.filter(u => u.role === 'Legal Staff' || u.role === 'Manager/Supervisor');
+  const staffMembers = users.filter(u => u.role === 'technical' || u.role === 'admin' || u.role === 'super_admin');
+
   const staffWorkload = staffMembers.map(staff => {
     const assignedWO = workOrders.filter(w => w.picStaffId === staff.id && w.status !== 'Completed').length;
     const assignedTasks = tasks.filter(t => t.assigneeId === staff.id && t.status !== 'Completed').length;

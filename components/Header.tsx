@@ -45,13 +45,14 @@ export default function Header({
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const roleColors: Record<UserRole, { bg: string; text: string; border: string }> = {
-    'Super Admin':        { bg: '#EEF2FF', text: '#4F46E5', border: '#C7D2FE' },
-    'Manager/Supervisor': { bg: '#EFF6FF', text: '#2563EB', border: '#BFDBFE' },
-    'Legal Staff':        { bg: '#ECFDF5', text: '#059669', border: '#A7F3D0' },
-    'Admin':              { bg: '#FFFBEB', text: '#D97706', border: '#FDE68A' },
-    'Finance':            { bg: '#ECFEFF', text: '#0891B2', border: '#A5F3FC' },
-    'Client':             { bg: '#FDF2F8', text: '#DB2777', border: '#FBCFE8' },
+    'super_admin': { bg: '#EEF2FF', text: '#4F46E5', border: '#C7D2FE' },
+    'admin':       { bg: '#EFF6FF', text: '#2563EB', border: '#BFDBFE' },
+    'technical':   { bg: '#ECFDF5', text: '#059669', border: '#A7F3D0' },
+    'finance':     { bg: '#ECFEFF', text: '#0891B2', border: '#A5F3FC' },
+    'notary':      { bg: '#F3E8FF', text: '#7E22CE', border: '#E9D5FF' },
+    'client':      { bg: '#FDF2F8', text: '#DB2777', border: '#FBCFE8' },
   };
+
 
   const rc = roleColors[currentUser.role];
 
@@ -156,56 +157,79 @@ export default function Header({
         <div className="relative">
           <button
             onClick={() => setShowRoleMenu(!showRoleMenu)}
-            className="flex items-center gap-2 rounded-xl p-1.5 pr-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 transition-all"
+            className="flex items-center gap-2.5 p-1 pl-1.5 pr-3 rounded-full hover:bg-slate-100/80 transition-all duration-200 group cursor-pointer"
           >
-            <div 
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-bold text-white bg-indigo-600 shrink-0 shadow-xs"
-            >
-              {currentUser.name.substring(0, 2).toUpperCase()}
+            <div className="relative shrink-0">
+              <div 
+                className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-black text-white bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-sm ring-2 ring-indigo-500/20 group-hover:ring-indigo-500/40 transition-all"
+              >
+                {currentUser.name.substring(0, 2).toUpperCase()}
+              </div>
+              <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
             </div>
+            
             <div className="hidden md:block text-left">
-              <p className="text-xs font-bold text-slate-900 leading-tight">{currentUser.name.split(' ')[0]}</p>
+              <p className="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight flex items-center gap-1">
+                {currentUser.name.split(' ')[0]}
+              </p>
               <span 
-                className="text-[9px] font-bold px-1.5 py-0.2 rounded"
+                className="inline-block text-[9px] font-extrabold px-1.5 py-0.2 rounded-full capitalize"
                 style={{ background: rc.bg, color: rc.text, border: `1px solid ${rc.border}` }}
               >
-                {currentUser.role}
+                {currentUser.role.replace('_', ' ')}
               </span>
             </div>
-            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+            <ChevronDown className="h-3.5 w-3.5 text-slate-400 group-hover:text-slate-600 transition-transform group-hover:translate-y-0.5" />
           </button>
 
           {showRoleMenu && (
             <div 
-              className="absolute right-0 mt-2 w-64 rounded-2xl p-3 shadow-xl bg-white border border-slate-200 z-50 animate-in fade-in duration-150"
+              className="absolute right-0 mt-2 w-72 rounded-2xl p-3 shadow-2xl bg-white border border-slate-200/90 z-50 animate-in fade-in zoom-in-95 duration-150"
             >
-              <div className="px-2 py-1.5 mb-2 border-b border-slate-100">
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Simulasi Role User</p>
-                <p className="text-xs text-slate-500 mt-0.5">Pilih pengguna untuk menguji akses:</p>
+              {/* User Identity Header */}
+              <div className="p-3 mb-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-black text-white bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-xs shrink-0">
+                  {currentUser.name.substring(0, 2).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-extrabold text-slate-900 truncate">{currentUser.name}</p>
+                  <p className="text-[10px] text-slate-500 truncate">{currentUser.email}</p>
+                  <span 
+                    className="inline-block text-[9px] font-bold px-2 py-0.2 rounded-full mt-1 capitalize"
+                    style={{ background: rc.bg, color: rc.text, border: `1px solid ${rc.border}` }}
+                  >
+                    {currentUser.role.replace('_', ' ')}
+                  </span>
+                </div>
               </div>
 
-              <div className="space-y-1">
+              <div className="px-2 py-1 mb-1">
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Simulasi Role (RBAC)</p>
+              </div>
+
+              <div className="space-y-1 max-h-60 overflow-y-auto pr-1">
                 {users.map((u) => {
                   const urc = roleColors[u.role];
+                  const isCurrent = u.id === currentUser.id;
                   return (
                     <button
                       key={u.id}
                       onClick={() => { onRoleChange(u); setShowRoleMenu(false); }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition-all ${
-                        u.id === currentUser.id
-                          ? 'bg-indigo-50 text-indigo-700 font-bold'
+                      className={`flex w-full items-center justify-between rounded-xl px-2.5 py-2 text-left text-xs transition-all ${
+                        isCurrent
+                          ? 'bg-indigo-50 text-indigo-700 font-extrabold border border-indigo-100'
                           : 'hover:bg-slate-50 text-slate-700'
                       }`}
                     >
-                      <div>
-                        <p className="font-semibold">{u.name}</p>
-                        <span className="text-[10px] text-slate-400">{u.department}</span>
+                      <div className="min-w-0 pr-2">
+                        <p className="font-bold truncate text-xs">{u.name}</p>
+                        <p className="text-[10px] text-slate-400 truncate">{u.department}</p>
                       </div>
                       <span 
-                        className="rounded px-1.5 py-0.2 text-[9px] font-bold"
+                        className="shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold capitalize"
                         style={{ background: urc.bg, color: urc.text, border: `1px solid ${urc.border}` }}
                       >
-                        {u.role}
+                        {u.role.replace('_', ' ')}
                       </span>
                     </button>
                   );
@@ -216,10 +240,10 @@ export default function Header({
                 <div className="pt-2 mt-2 border-t border-slate-100">
                   <button
                     onClick={() => { setShowRoleMenu(false); onLogout(); }}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-rose-600 hover:bg-rose-50 transition-all"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100/80 transition-all"
                   >
-                    <LogOut className="h-4 w-4" />
-                    <span>Keluar (Halaman Login)</span>
+                    <LogOut className="h-3.5 w-3.5" />
+                    <span>Keluar (Logout IAM)</span>
                   </button>
                 </div>
               )}

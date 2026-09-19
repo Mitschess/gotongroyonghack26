@@ -69,7 +69,7 @@ export default function TodaysActionsView({
             >
               <Zap className="h-3.5 w-3.5 text-indigo-600" /> Action-First Engine
             </div>
-            <h2 className="text-xl md:text-2xl font-black tracking-tight text-slate-900">Today&apos;s Actions (Tindakan Hari Ini)</h2>
+            <h2 className="text-xl md:text-2xl font-black tracking-tight text-slate-900">Today&apos;s Actions</h2>
             <p className="text-xs md:text-sm mt-1 text-slate-500">
               Sabtu, 19 Sep 2026 — Daftar tugas berurutan prioritas langsung dengan tombol aksi 1-klik.
             </p>

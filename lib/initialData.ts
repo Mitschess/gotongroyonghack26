@@ -14,16 +14,17 @@ import {
 } from '../types/legal';
 
 export const INITIAL_USERS: User[] = [
-  { id: 'usr-1', name: 'Bambang Soetjipto', email: 'bambang@legalwork.co.id', role: 'Super Admin', department: 'Executive Management', phone: '0812-1000-0001' },
-  { id: 'usr-2', name: 'Maya Putri, S.H.', email: 'maya.putri@legalwork.co.id', role: 'Manager/Supervisor', department: 'Legal Operations', phone: '0812-1000-0002' },
-  { id: 'usr-3', name: 'Budi Santoso, S.H.', email: 'budi.santoso@legalwork.co.id', role: 'Legal Staff', department: 'Corporate Legal', phone: '0812-1000-0003' },
-  { id: 'usr-4', name: 'Siti Rahma, S.H.', email: 'siti.rahma@legalwork.co.id', role: 'Legal Staff', department: 'Licensing & Permits', phone: '0812-1000-0004' },
-  { id: 'usr-5', name: 'Eko Prasetyo', email: 'eko.prasetyo@legalwork.co.id', role: 'Admin', department: 'Administration', phone: '0812-1000-0005' },
-  { id: 'usr-6', name: 'Agus Hermawan, A.Md.', email: 'agus.hermawan@legalwork.co.id', role: 'Finance', department: 'Finance & Billing', phone: '0812-1000-0006' },
-  { id: 'usr-8', name: 'Notaris Soebagjo, S.H., M.Kn.', email: 'soebagjo.notaris@gmail.com', role: 'Notary', department: 'Rekan Notaris Jakarta Pusat', phone: '0815-9988-1122' },
-  { id: 'usr-9', name: 'Notaris Dewi Anggraini, S.H.', email: 'dewi.notaris@gmail.com', role: 'Notary', department: 'Rekan Notaris Jakarta Selatan', phone: '0817-2233-4455' },
-  { id: 'usr-7', name: 'Hendra Wijaya (PT Nusantara Tech)', email: 'hendra@nusantaratech.id', role: 'Client', department: 'Client Portal', phone: '0812-9876-5432' }
+  { id: 'usr-1', name: 'Bambang Soetjipto', email: 'bambang@legalwork.co.id', role: 'super_admin', department: 'Executive Management', phone: '0812-1000-0001' },
+  { id: 'usr-2', name: 'Maya Putri, S.H.', email: 'maya.putri@legalwork.co.id', role: 'admin', department: 'Legal Operations', phone: '0812-1000-0002' },
+  { id: 'usr-3', name: 'Budi Santoso, S.H.', email: 'budi.santoso@legalwork.co.id', role: 'technical', department: 'Corporate Legal', phone: '0812-1000-0003' },
+  { id: 'usr-4', name: 'Siti Rahma, S.H.', email: 'siti.rahma@legalwork.co.id', role: 'technical', department: 'Licensing & Permits', phone: '0812-1000-0004' },
+  { id: 'usr-5', name: 'Eko Prasetyo', email: 'eko.prasetyo@legalwork.co.id', role: 'admin', department: 'Administration', phone: '0812-1000-0005' },
+  { id: 'usr-6', name: 'Agus Hermawan, A.Md.', email: 'agus.hermawan@legalwork.co.id', role: 'finance', department: 'Finance & Billing', phone: '0812-1000-0006' },
+  { id: 'usr-8', name: 'Notaris Soebagjo, S.H., M.Kn.', email: 'soebagjo.notaris@gmail.com', role: 'notary', department: 'Rekan Notaris Jakarta Pusat', phone: '0815-9988-1122' },
+  { id: 'usr-9', name: 'Notaris Dewi Anggraini, S.H.', email: 'dewi.notaris@gmail.com', role: 'notary', department: 'Rekan Notaris Jakarta Selatan', phone: '0817-2233-4455' },
+  { id: 'usr-7', name: 'Hendra Wijaya (PT Nusantara Tech)', email: 'hendra@nusantaratech.id', role: 'client', department: 'Client Portal', phone: '0812-9876-5432' }
 ];
+
 
 export const INITIAL_CLIENTS: Client[] = [
   {
@@ -503,7 +504,7 @@ export const INITIAL_APPROVALS: ApprovalRequest[] = [
     workOrderTitle: 'Perubahan Akta CV Karya Mandiri',
     requestedBy: 'Siti Rahma, S.H.',
     requestedAt: '2026-09-19 10:15',
-    targetApproverRole: 'Manager/Supervisor',
+    targetApproverRole: 'admin',
     approverName: 'Maya Putri, S.H.',
     documentId: 'doc-002',
     documentTitle: 'Draf Akta Perubahan Notaris',
@@ -519,7 +520,7 @@ export const INITIAL_APPROVALS: ApprovalRequest[] = [
     workOrderTitle: 'Pendirian PT Nusantara Tech Solution',
     requestedBy: 'Budi Santoso, S.H.',
     requestedAt: '2026-09-18 15:30',
-    targetApproverRole: 'Manager/Supervisor',
+    targetApproverRole: 'admin',
     approverName: 'Maya Putri, S.H.',
     type: 'Stage Completion',
     status: 'Approved',
@@ -535,7 +536,7 @@ export const INITIAL_APPROVALS: ApprovalRequest[] = [
     workOrderTitle: 'Pendaftaran NIB PT Synergy Energi Utama',
     requestedBy: 'Budi Santoso, S.H.',
     requestedAt: '2026-09-14 09:00',
-    targetApproverRole: 'Manager/Supervisor',
+    targetApproverRole: 'admin',
     approverName: 'Maya Putri, S.H.',
     type: 'Final WO Completion',
     status: 'Approved',

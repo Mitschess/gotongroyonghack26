@@ -37,10 +37,10 @@ export default function MobileNav({
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   const primaryMobileTabs = [
-    { id: 'todays_actions', label: 'Tindakan', icon: Zap, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin'] },
-    { id: 'workorders', label: 'Work Order', icon: FolderKanban, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin', 'Client'] },
-    { id: 'whatsapp', label: 'WA Proxy', icon: MessageSquare, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin', 'Notary', 'Client'] },
-    { id: 'ai', label: 'AI Suite', icon: Sparkles, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin'] },
+    { id: 'todays_actions', label: 'Tindakan', icon: Zap, roles: ['super_admin', 'admin', 'technical'] },
+    { id: 'workorders', label: 'Work Order', icon: FolderKanban, roles: ['super_admin', 'admin', 'technical', 'client'] },
+    { id: 'whatsapp', label: 'WA Proxy', icon: MessageSquare, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'] },
+    { id: 'ai', label: 'AI Suite', icon: Sparkles, roles: ['super_admin', 'admin', 'technical'] },
   ];
 
   const moreMenuItems = [
