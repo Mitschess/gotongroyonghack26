@@ -4,6 +4,7 @@ export type UserRole =
   | 'Legal Staff' 
   | 'Admin' 
   | 'Finance' 
+  | 'Notary'
   | 'Client';
 
 export interface User {
@@ -13,6 +14,7 @@ export interface User {
   role: UserRole;
   avatarUrl?: string;
   department?: string;
+  phone?: string;
 }
 
 export type ClientType = 'PT' | 'CV' | 'PMA' | 'Perorangan' | 'Yayasan' | 'Lainnya';
@@ -54,6 +56,8 @@ export interface Service {
 
 export type WorkOrderStatus = 'Draft' | 'To Do' | 'In Progress' | 'Review' | 'Completed' | 'Blocked' | 'Cancelled';
 export type Priority = 'Low' | 'Medium' | 'High' | 'Urgent';
+export type SlaHealth = 'ON_TRACK' | 'WARNING' | 'HIGH_RISK' | 'CRITICAL';
+export type BlockedOn = 'CLIENT' | 'NOTARY' | 'ADMIN' | 'SYSTEM' | 'EXTERNAL' | 'NONE';
 
 export interface Task {
   id: string;
@@ -68,6 +72,8 @@ export interface Task {
   attachmentsCount: number;
   notesCount: number;
   createdAt: string;
+  targetRole?: 'Legal Staff' | 'Notary' | 'Client' | 'Admin';
+  expectedDocType?: string;
 }
 
 export interface WorkOrderWorkflow {
@@ -77,6 +83,7 @@ export interface WorkOrderWorkflow {
   completedAt?: string;
   completedBy?: string;
   notes?: string;
+  clientFriendlyLabel?: string;
 }
 
 export interface WorkOrder {
@@ -88,16 +95,22 @@ export interface WorkOrder {
   serviceName: string;
   picStaffId: string;
   picStaffName: string;
+  notaryId?: string;
+  notaryName?: string;
   priority: Priority;
   startDate: string;
   deadline: string;
   status: WorkOrderStatus;
+  health: SlaHealth;
+  blockedOn: BlockedOn;
   currentStageIndex: number;
   workflow: WorkOrderWorkflow[];
   progressPercent: number;
   estimatedPrice: number;
   description: string;
   createdAt: string;
+  actionRequired?: string;
+  clientActionItem?: string;
 }
 
 export type DocumentCategory = 
@@ -134,6 +147,9 @@ export interface LegalDocument {
   uploadedAt: string;
   versions: DocumentVersion[];
   accessLevel: 'Public' | 'Restricted' | 'Confidential';
+  aiConfidence?: number;
+  aiClassification?: string;
+  verificationStatus?: 'VERIFIED' | 'NEEDS_REVIEW' | 'REJECTED';
 }
 
 export type ApprovalStatus = 'Pending' | 'Approved' | 'Rejected' | 'Revision Required';
@@ -173,7 +189,7 @@ export interface NotificationItem {
   message: string;
   timestamp: string;
   read: boolean;
-  type: 'task' | 'approval' | 'deadline' | 'system';
+  type: 'task' | 'approval' | 'deadline' | 'system' | 'whatsapp';
   linkTarget?: string;
 }
 
@@ -216,3 +232,28 @@ export interface Invoice {
   paymentMethod?: string;
   lastPaymentDate?: string;
 }
+
+export interface WhatsAppMessage {
+  id: string;
+  workOrderId: string;
+  workOrderNumber: string;
+  senderRole: 'Client' | 'Notary' | 'Platform' | 'System';
+  senderName: string;
+  maskedPhone: string;
+  recipientRole: 'Client' | 'Notary' | 'Admin';
+  messageText: string;
+  timestamp: string;
+  resolutionMethod: 'REPLY_CONTEXT' | 'EXPLICIT_CODE' | 'SINGLE_ACTIVE' | 'ASK_USER';
+  templateCode?: string;
+  status: 'DELIVERED' | 'SENT' | 'PENDING_RESOLUTION' | 'NEEDS_REVIEW';
+}
+
+export interface KtpOcrResult {
+  nik: string;
+  nama: string;
+  alamat: string;
+  tanggalLahir: string;
+  confidence: number;
+  status: 'SUCCESS' | 'NEEDS_VERIFICATION';
+}
+

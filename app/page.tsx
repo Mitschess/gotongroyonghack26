@@ -13,6 +13,12 @@ import CalendarView from '../components/CalendarView';
 import FinanceView from '../components/FinanceView';
 import ReportsView from '../components/ReportsView';
 import AuditLogView from '../components/AuditLogView';
+import TodaysActionsView from '../components/TodaysActionsView';
+import WhatsAppHubView from '../components/WhatsAppHubView';
+import AIFeaturesView from '../components/AIFeaturesView';
+import ClientMobilePortalView from '../components/ClientMobilePortalView';
+import NotaryPortalView from '../components/NotaryPortalView';
+import MobileNav from '../components/MobileNav';
 
 import { 
   INITIAL_USERS, 
@@ -26,7 +32,8 @@ import {
   INITIAL_NOTIFICATIONS, 
   INITIAL_WORK_NOTES, 
   INITIAL_ACTIVITY_LOGS, 
-  INITIAL_INVOICES 
+  INITIAL_INVOICES,
+  INITIAL_WHATSAPP_MESSAGES
 } from '../lib/initialData';
 
 import { 
@@ -44,7 +51,9 @@ import {
   Invoice,
   ApprovalStatus,
   WorkOrderStatus,
-  InvoiceStatus
+  InvoiceStatus,
+  WhatsAppMessage,
+  KtpOcrResult
 } from '../types/legal';
 
 export default function Home() {
@@ -62,8 +71,9 @@ export default function Home() {
   const [workNotes, setWorkNotes] = useState<WorkNote[]>(INITIAL_WORK_NOTES);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(INITIAL_ACTIVITY_LOGS);
   const [invoices, setInvoices] = useState<Invoice[]>(INITIAL_INVOICES);
+  const [whatsappMessages, setWhatsappMessages] = useState<WhatsAppMessage[]>(INITIAL_WHATSAPP_MESSAGES);
 
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [activeTab, setActiveTab] = useState<string>('todays_actions');
   const [globalSearch, setGlobalSearch] = useState<string>('');
 
   // Selected Work Order for deep view
@@ -100,6 +110,15 @@ export default function Home() {
   const handleRoleChange = (selectedUser: User) => {
     setCurrentUser(selectedUser);
     logActivity('Switch User Role', `Beralih ke role ${selectedUser.role} (${selectedUser.name})`);
+
+    // Switch default active tab based on role
+    if (selectedUser.role === 'Client') {
+      setActiveTab('client_portal');
+    } else if (selectedUser.role === 'Notary') {
+      setActiveTab('notary_tasks');
+    } else if (activeTab === 'client_portal' || activeTab === 'notary_tasks') {
+      setActiveTab('todays_actions');
+    }
   };
 
   const handleMarkNotificationRead = (id: string) => {
@@ -128,6 +147,17 @@ export default function Home() {
     addNotification('Klien Terdaftar', `Klien ${newClient.name} berhasil ditambahkan.`, 'system');
   };
 
+  const handleApplyOcrData = (ocrData: Partial<KtpOcrResult>) => {
+    if (!ocrData.nama) return;
+    handleAddClient({
+      name: ocrData.nama,
+      companyName: `PT ${ocrData.nama} Tech`,
+      address: ocrData.alamat,
+      notes: `Registrasi otomatis via OCR KTP NIK ${ocrData.nik}`
+    });
+    setActiveTab('clients');
+  };
+
   const handleAddService = (newServiceData: Partial<Service>) => {
     const newService: Service = {
       id: `srv-${Date.now().toString().slice(-3)}`,
@@ -150,7 +180,6 @@ export default function Home() {
     const service = services.find(s => s.id === serviceId);
     if (!client || !service) return;
 
-    // Automatically create a Work Order from Service Request (FR-09 & FR-10)
     handleAddWorkOrder({
       clientId: client.id,
       clientName: client.name,
@@ -187,15 +216,21 @@ export default function Home() {
       serviceName: newWoData.serviceName || '',
       picStaffId: newWoData.picStaffId || 'usr-3',
       picStaffName: newWoData.picStaffName || 'Budi Santoso, S.H.',
+      notaryId: newWoData.notaryId || 'usr-8',
+      notaryName: newWoData.notaryName || 'Notaris Soebagjo, S.H., M.Kn.',
       priority: newWoData.priority || 'Medium',
       startDate: newWoData.startDate || new Date().toISOString().slice(0, 10),
       deadline: newWoData.deadline || '2026-10-10',
       status: newWoData.status || 'In Progress',
+      health: newWoData.health || 'ON_TRACK',
+      blockedOn: newWoData.blockedOn || 'NONE',
       currentStageIndex: newWoData.currentStageIndex || 0,
       progressPercent: newWoData.progressPercent || 20,
       estimatedPrice: newWoData.estimatedPrice || 5000000,
       description: newWoData.description || '',
       createdAt: new Date().toISOString().slice(0, 10),
+      actionRequired: newWoData.actionRequired || 'Menunggu pemrosesan tim legal',
+      clientActionItem: newWoData.clientActionItem || 'Tidak ada aksi yang diperlukan saat ini',
       workflow: newWoData.workflow || []
     };
 
@@ -283,9 +318,9 @@ export default function Home() {
       clientId: newDocData.clientId || '',
       clientName: newDocData.clientName || '',
       currentVersion: 1,
-      fileType: 'PDF',
-      fileSize: '1.5 MB',
-      uploadedBy: currentUser.name,
+      fileType: newDocData.fileType || 'PDF',
+      fileSize: newDocData.fileSize || '1.5 MB',
+      uploadedBy: newDocData.uploadedBy || currentUser.name,
       uploadedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
       accessLevel: newDocData.accessLevel || 'Restricted',
       versions: newDocData.versions || []
@@ -294,6 +329,27 @@ export default function Home() {
     setDocuments(prev => [newDoc, ...prev]);
     logActivity('Upload Dokumen Legal', `${newDoc.docNumber} - ${newDoc.title}`);
     addNotification('Dokumen Diunggah', `Dokumen ${newDoc.title} telah diunggah oleh ${currentUser.name}`, 'system');
+  };
+
+  const handleSendWhatsappMessage = (msg: Partial<WhatsAppMessage>) => {
+    const newMsg: WhatsAppMessage = {
+      id: `wa-${Date.now()}`,
+      workOrderId: msg.workOrderId || 'wo-101',
+      workOrderNumber: msg.workOrderNumber || 'WO-2026-00101',
+      senderRole: msg.senderRole || 'Platform',
+      senderName: msg.senderName || currentUser.name,
+      maskedPhone: msg.maskedPhone || '0811-0000-PROXY',
+      recipientRole: msg.recipientRole || 'Client',
+      messageText: msg.messageText || '',
+      timestamp: msg.timestamp || 'Baru saja',
+      resolutionMethod: msg.resolutionMethod || 'REPLY_CONTEXT',
+      templateCode: msg.templateCode,
+      status: msg.status || 'DELIVERED'
+    };
+
+    setWhatsappMessages(prev => [...prev, newMsg]);
+    logActivity('Kirim WhatsApp Proxy Relay', `WO ${newMsg.workOrderNumber} ke ${newMsg.recipientRole}`);
+    addNotification('WhatsApp Relay Sent', `Pesan WA ke ${newMsg.recipientRole} berhasil dikirim via proxy.`, 'whatsapp');
   };
 
   const handleRequestApproval = (workOrderId: string, type: 'Stage Completion' | 'Document Signoff' | 'Final WO Completion') => {
@@ -384,7 +440,7 @@ export default function Home() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 antialiased">
-      {/* Sidebar Navigation */}
+      {/* Sidebar Navigation (Desktop Wide Screens) */}
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -409,7 +465,66 @@ export default function Home() {
         />
 
         {/* Dynamic Views Viewport */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 space-y-6">
+          {activeTab === 'todays_actions' && (
+            <TodaysActionsView
+              workOrders={workOrders}
+              tasks={tasks}
+              documents={documents}
+              onNavigateTab={(tab) => setActiveTab(tab)}
+              onSendWhatsappReminder={(woId, recipient, role) => {
+                const wo = workOrders.find(w => w.id === woId);
+                handleSendWhatsappMessage({
+                  workOrderId: woId,
+                  workOrderNumber: wo?.woNumber,
+                  senderRole: 'Platform',
+                  recipientRole: role as any,
+                  messageText: `[Reminder ${wo?.woNumber}] Halo ${recipient}, mohon kelengkapan dokumen perizinan diselesaikan.`,
+                  templateCode: 'wa_task_reminder'
+                });
+              }}
+              onOpenReview={(woId) => {
+                setActiveTab('approvals');
+              }}
+            />
+          )}
+
+          {activeTab === 'whatsapp' && (
+            <WhatsAppHubView
+              workOrders={workOrders}
+              messages={whatsappMessages}
+              onSendMessage={handleSendWhatsappMessage}
+            />
+          )}
+
+          {activeTab === 'ai' && (
+            <AIFeaturesView
+              workOrders={workOrders}
+              documents={documents}
+              onApplyOcrData={handleApplyOcrData}
+            />
+          )}
+
+          {activeTab === 'client_portal' && (
+            <ClientMobilePortalView
+              workOrders={workOrders}
+              documents={documents}
+              clientName={currentUser.name}
+              onUploadDoc={handleUploadDocument}
+              onNavigateTab={(tab) => setActiveTab(tab)}
+            />
+          )}
+
+          {activeTab === 'notary_tasks' && (
+            <NotaryPortalView
+              workOrders={workOrders}
+              tasks={tasks}
+              notaryName={currentUser.name}
+              onUploadDocument={handleUploadDocument}
+              onNavigateTab={(tab) => setActiveTab(tab)}
+            />
+          )}
+
           {activeTab === 'dashboard' && (
             <DashboardView
               workOrders={workOrders}
@@ -520,6 +635,15 @@ export default function Home() {
           )}
         </main>
       </div>
+
+      {/* Touch-Optimized Mobile Navigation Bar */}
+      <MobileNav
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        pendingApprovalsCount={pendingApprovalsCount}
+        userRole={currentUser.role}
+      />
     </div>
   );
 }
+

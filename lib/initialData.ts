@@ -14,13 +14,15 @@ import {
 } from '../types/legal';
 
 export const INITIAL_USERS: User[] = [
-  { id: 'usr-1', name: 'Bambang Soetjipto', email: 'bambang@legalwork.co.id', role: 'Super Admin', department: 'Executive Management' },
-  { id: 'usr-2', name: 'Maya Putri, S.H.', email: 'maya.putri@legalwork.co.id', role: 'Manager/Supervisor', department: 'Legal Operations' },
-  { id: 'usr-3', name: 'Budi Santoso, S.H.', email: 'budi.santoso@legalwork.co.id', role: 'Legal Staff', department: 'Corporate Legal' },
-  { id: 'usr-4', name: 'Siti Rahma, S.H.', email: 'siti.rahma@legalwork.co.id', role: 'Legal Staff', department: 'Licensing & Permits' },
-  { id: 'usr-5', name: 'Eko Prasetyo', email: 'eko.prasetyo@legalwork.co.id', role: 'Admin', department: 'Administration' },
-  { id: 'usr-6', name: 'Agus Hermawan, A.Md.', email: 'agus.hermawan@legalwork.co.id', role: 'Finance', department: 'Finance & Billing' },
-  { id: 'usr-7', name: 'Hendra Wijaya (PT Nusantara Tech)', email: 'hendra@nusantaratech.id', role: 'Client', department: 'Client Portal' }
+  { id: 'usr-1', name: 'Bambang Soetjipto', email: 'bambang@legalwork.co.id', role: 'Super Admin', department: 'Executive Management', phone: '0812-1000-0001' },
+  { id: 'usr-2', name: 'Maya Putri, S.H.', email: 'maya.putri@legalwork.co.id', role: 'Manager/Supervisor', department: 'Legal Operations', phone: '0812-1000-0002' },
+  { id: 'usr-3', name: 'Budi Santoso, S.H.', email: 'budi.santoso@legalwork.co.id', role: 'Legal Staff', department: 'Corporate Legal', phone: '0812-1000-0003' },
+  { id: 'usr-4', name: 'Siti Rahma, S.H.', email: 'siti.rahma@legalwork.co.id', role: 'Legal Staff', department: 'Licensing & Permits', phone: '0812-1000-0004' },
+  { id: 'usr-5', name: 'Eko Prasetyo', email: 'eko.prasetyo@legalwork.co.id', role: 'Admin', department: 'Administration', phone: '0812-1000-0005' },
+  { id: 'usr-6', name: 'Agus Hermawan, A.Md.', email: 'agus.hermawan@legalwork.co.id', role: 'Finance', department: 'Finance & Billing', phone: '0812-1000-0006' },
+  { id: 'usr-8', name: 'Notaris Soebagjo, S.H., M.Kn.', email: 'soebagjo.notaris@gmail.com', role: 'Notary', department: 'Rekan Notaris Jakarta Pusat', phone: '0815-9988-1122' },
+  { id: 'usr-9', name: 'Notaris Dewi Anggraini, S.H.', email: 'dewi.notaris@gmail.com', role: 'Notary', department: 'Rekan Notaris Jakarta Selatan', phone: '0817-2233-4455' },
+  { id: 'usr-7', name: 'Hendra Wijaya (PT Nusantara Tech)', email: 'hendra@nusantaratech.id', role: 'Client', department: 'Client Portal', phone: '0812-9876-5432' }
 ];
 
 export const INITIAL_CLIENTS: Client[] = [
@@ -180,21 +182,27 @@ export const INITIAL_WORK_ORDERS: WorkOrder[] = [
     serviceName: 'Pendirian PT Perseroan Terbatas (Lokal)',
     picStaffId: 'usr-3',
     picStaffName: 'Budi Santoso, S.H.',
+    notaryId: 'usr-8',
+    notaryName: 'Notaris Soebagjo, S.H., M.Kn.',
     priority: 'High',
     startDate: '2026-09-10',
     deadline: '2026-09-24',
     status: 'In Progress',
+    health: 'ON_TRACK',
+    blockedOn: 'NOTARY',
     currentStageIndex: 3,
     progressPercent: 75,
     estimatedPrice: 9500000,
     description: 'Pengurusan pendirian PT baru untuk ekspansi lini bisnis cloud computing.',
     createdAt: '2026-09-10',
+    actionRequired: 'Follow up Notaris Soebagjo untuk upload Minuta Akta Final',
+    clientActionItem: 'Menunggu proses Notaris & penyusunan Akta Final',
     workflow: [
-      { stageId: 'stg-1', stageName: 'Permintaan & Pengumpulan Dokumen', status: 'Completed', completedAt: '2026-09-12', completedBy: 'Budi Santoso, S.H.' },
-      { stageId: 'stg-2', stageName: 'Pengecekan Nama & Minuta Akta Notaris', status: 'Completed', completedAt: '2026-09-15', completedBy: 'Budi Santoso, S.H.' },
-      { stageId: 'stg-3', stageName: 'Penandatanganan Akta & SK Kemenkumham', status: 'Completed', completedAt: '2026-09-18', completedBy: 'Maya Putri, S.H.' },
-      { stageId: 'stg-4', stageName: 'Pengurusan NIB & Perizinan OSS-RBA', status: 'In Progress' },
-      { stageId: 'stg-5', stageName: 'Pemeriksaan Akhir & Penyerahan Berkas', status: 'Pending' }
+      { stageId: 'stg-1', stageName: 'Permintaan & Pengumpulan Dokumen', status: 'Completed', completedAt: '2026-09-12', completedBy: 'Budi Santoso, S.H.', clientFriendlyLabel: 'Pembayaran diterima & berkas diupload' },
+      { stageId: 'stg-2', stageName: 'Pengecekan Nama & Minuta Akta Notaris', status: 'Completed', completedAt: '2026-09-15', completedBy: 'Budi Santoso, S.H.', clientFriendlyLabel: 'Data perusahaan lengkap & nama disetujui' },
+      { stageId: 'stg-3', stageName: 'Penandatanganan Akta & SK Kemenkumham', status: 'Completed', completedAt: '2026-09-18', completedBy: 'Maya Putri, S.H.', clientFriendlyLabel: 'Notaris memproses dokumen akta' },
+      { stageId: 'stg-4', stageName: 'Pengurusan NIB & Perizinan OSS-RBA', status: 'In Progress', clientFriendlyLabel: 'Draft akta disiapkan untuk disetujui' },
+      { stageId: 'stg-5', stageName: 'Pemeriksaan Akhir & Penyerahan Berkas', status: 'Pending', clientFriendlyLabel: 'Dokumen final diserahkan' }
     ]
   },
   {
@@ -206,21 +214,27 @@ export const INITIAL_WORK_ORDERS: WorkOrder[] = [
     serviceName: 'Perubahan Akta & Anggaran Dasar Perusahaan',
     picStaffId: 'usr-4',
     picStaffName: 'Siti Rahma, S.H.',
+    notaryId: 'usr-9',
+    notaryName: 'Notaris Dewi Anggraini, S.H.',
     priority: 'Medium',
     startDate: '2026-09-14',
     deadline: '2026-09-22',
     status: 'Review',
+    health: 'WARNING',
+    blockedOn: 'ADMIN',
     currentStageIndex: 3,
     progressPercent: 85,
     estimatedPrice: 6500000,
     description: 'Perubahan susunan Sekutu Komanditer dan penambahan modal disetor.',
     createdAt: '2026-09-14',
+    actionRequired: 'Review dokumen Draf RUPS & persetujuan Manager',
+    clientActionItem: 'Menunggu review tim legal internal',
     workflow: [
-      { stageId: 'stg-201', stageName: 'Pemeriksaan Dokumen RUPS', status: 'Completed', completedAt: '2026-09-15', completedBy: 'Siti Rahma, S.H.' },
-      { stageId: 'stg-202', stageName: 'Pembuatan Draf Akta Perubahan', status: 'Completed', completedAt: '2026-09-17', completedBy: 'Siti Rahma, S.H.' },
-      { stageId: 'stg-203', stageName: 'Persetujuan / Pemberitahuan Kemenkumham', status: 'Completed', completedAt: '2026-09-19', completedBy: 'Siti Rahma, S.H.' },
-      { stageId: 'stg-204', stageName: 'Update Data NIB / AHU Online', status: 'In Progress' },
-      { stageId: 'stg-205', stageName: 'Penyerahan Salinan Akta', status: 'Pending' }
+      { stageId: 'stg-201', stageName: 'Pemeriksaan Dokumen RUPS', status: 'Completed', completedAt: '2026-09-15', completedBy: 'Siti Rahma, S.H.', clientFriendlyLabel: 'Pemeriksaan risalah RUPS' },
+      { stageId: 'stg-202', stageName: 'Pembuatan Draf Akta Perubahan', status: 'Completed', completedAt: '2026-09-17', completedBy: 'Siti Rahma, S.H.', clientFriendlyLabel: 'Pembuatan draf perubahan' },
+      { stageId: 'stg-203', stageName: 'Persetujuan / Pemberitahuan Kemenkumham', status: 'Completed', completedAt: '2026-09-19', completedBy: 'Siti Rahma, S.H.', clientFriendlyLabel: 'Pemberitahuan ke Kemenkumham' },
+      { stageId: 'stg-204', stageName: 'Update Data NIB / AHU Online', status: 'In Progress', clientFriendlyLabel: 'Pembaruan NIB OSS' },
+      { stageId: 'stg-205', stageName: 'Penyerahan Salinan Akta', status: 'Pending', clientFriendlyLabel: 'Salinan akta diserahkan' }
     ]
   },
   {
@@ -236,16 +250,20 @@ export const INITIAL_WORK_ORDERS: WorkOrder[] = [
     startDate: '2026-09-01',
     deadline: '2026-09-15',
     status: 'Completed',
+    health: 'ON_TRACK',
+    blockedOn: 'NONE',
     currentStageIndex: 3,
     progressPercent: 100,
     estimatedPrice: 4500000,
     description: 'Pengurusan NIB usaha sektor ketenagalistrikan dan panel surya.',
     createdAt: '2026-09-01',
+    actionRequired: 'Pekerjaan telah selesai sepenuhnya.',
+    clientActionItem: 'Seluruh dokumen legal siap diunduh di portal.',
     workflow: [
-      { stageId: 'stg-301', stageName: 'Analisis KBLI & Verifikasi Lokasi', status: 'Completed', completedAt: '2026-09-03', completedBy: 'Budi Santoso, S.H.' },
-      { stageId: 'stg-302', stageName: 'Penginputan Sistem OSS-RBA', status: 'Completed', completedAt: '2026-09-07', completedBy: 'Budi Santoso, S.H.' },
-      { stageId: 'stg-303', stageName: 'Verifikasi Instansi Teknis', status: 'Completed', completedAt: '2026-09-11', completedBy: 'Budi Santoso, S.H.' },
-      { stageId: 'stg-304', stageName: 'Penerbitan Sertifikat Standar / NIB', status: 'Completed', completedAt: '2026-09-14', completedBy: 'Maya Putri, S.H.' }
+      { stageId: 'stg-301', stageName: 'Analisis KBLI & Verifikasi Lokasi', status: 'Completed', completedAt: '2026-09-03', completedBy: 'Budi Santoso, S.H.', clientFriendlyLabel: 'Analisis KBLI selesai' },
+      { stageId: 'stg-302', stageName: 'Penginputan Sistem OSS-RBA', status: 'Completed', completedAt: '2026-09-07', completedBy: 'Budi Santoso, S.H.', clientFriendlyLabel: 'Input OSS RBA selesai' },
+      { stageId: 'stg-303', stageName: 'Verifikasi Instansi Teknis', status: 'Completed', completedAt: '2026-09-11', completedBy: 'Budi Santoso, S.H.', clientFriendlyLabel: 'Verifikasi teknis selesai' },
+      { stageId: 'stg-304', stageName: 'Penerbitan Sertifikat Standar / NIB', status: 'Completed', completedAt: '2026-09-14', completedBy: 'Maya Putri, S.H.', clientFriendlyLabel: 'NIB resmi terbit' }
     ]
   },
   {
@@ -261,19 +279,67 @@ export const INITIAL_WORK_ORDERS: WorkOrder[] = [
     startDate: '2026-09-18',
     deadline: '2026-10-18',
     status: 'To Do',
+    health: 'HIGH_RISK',
+    blockedOn: 'CLIENT',
     currentStageIndex: 0,
     progressPercent: 10,
     estimatedPrice: 3500000,
     description: 'Pendaftaran merek aplikasi "HealthKu" Kelas 9 dan Kelas 42.',
     createdAt: '2026-09-18',
+    actionRequired: 'Kirim WhatsApp reminder ke Klien untuk unggah Surat Pernyataan Merek',
+    clientActionItem: 'Mohon unggah Surat Pernyataan Kepemilikan Merek',
     workflow: [
-      { stageId: 'stg-401', stageName: 'Penelusuran Merek (Trademark Search)', status: 'In Progress' },
-      { stageId: 'stg-402', stageName: 'Penyiapan Berkas & Klasifikasi Kelas', status: 'Pending' },
-      { stageId: 'stg-403', stageName: 'Pendaftaran Online ke DJKI', status: 'Pending' },
-      { stageId: 'stg-404', stageName: 'Penerbitan Bukti Agenda & Pengawasan', status: 'Pending' }
+      { stageId: 'stg-401', stageName: 'Penelusuran Merek (Trademark Search)', status: 'In Progress', clientFriendlyLabel: 'Penelusuran nama merek' },
+      { stageId: 'stg-402', stageName: 'Penyiapan Berkas & Klasifikasi Kelas', status: 'Pending', clientFriendlyLabel: 'Penyiapan berkas DJKI' },
+      { stageId: 'stg-403', stageName: 'Pendaftaran Online ke DJKI', status: 'Pending', clientFriendlyLabel: 'Submit ke DJKI Kemenkumham' },
+      { stageId: 'stg-404', stageName: 'Penerbitan Bukti Agenda & Pengawasan', status: 'Pending', clientFriendlyLabel: 'Penerbitan Sertifikat Merek' }
     ]
   }
 ];
+
+export const INITIAL_WHATSAPP_MESSAGES = [
+  {
+    id: 'wa-001',
+    workOrderId: 'wo-101',
+    workOrderNumber: 'WO-2026-00101',
+    senderRole: 'Notary' as const,
+    senderName: 'Notaris Soebagjo, S.H., M.Kn.',
+    maskedPhone: '0815-****-1122',
+    recipientRole: 'Client' as const,
+    messageText: 'Draf akta pendirian PT Nusantara Tech Solution sudah kami unggah ke platform. Mohon diperiksa.',
+    timestamp: '19 Sep 2026, 09:30',
+    resolutionMethod: 'REPLY_CONTEXT' as const,
+    status: 'DELIVERED' as const
+  },
+  {
+    id: 'wa-002',
+    workOrderId: 'wo-101',
+    workOrderNumber: 'WO-2026-00101',
+    senderRole: 'Client' as const,
+    senderName: 'Hendra Wijaya',
+    maskedPhone: '0812-****-5432',
+    recipientRole: 'Notary' as const,
+    messageText: 'Baik Pak Notaris, kami telah menyetujui e-draf akta tersebut.',
+    timestamp: '19 Sep 2026, 10:05',
+    resolutionMethod: 'EXPLICIT_CODE' as const,
+    status: 'DELIVERED' as const
+  },
+  {
+    id: 'wa-003',
+    workOrderId: 'wo-104',
+    workOrderNumber: 'WO-2026-00104',
+    senderRole: 'Platform' as const,
+    senderName: 'System Bot LexiFlow',
+    maskedPhone: '0811-0000-PROXY',
+    recipientRole: 'Client' as const,
+    messageText: 'Halo Pak Ahmad, reminder pengurusan merek HealthKu memerlukan unggahan Surat Pernyataan Merek.',
+    timestamp: '19 Sep 2026, 11:15',
+    resolutionMethod: 'SINGLE_ACTIVE' as const,
+    templateCode: 'wa_task_reminder',
+    status: 'SENT' as const
+  }
+];
+
 
 export const INITIAL_TASKS: Task[] = [
   {

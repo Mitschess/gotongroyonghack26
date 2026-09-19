@@ -13,7 +13,12 @@ import {
   BarChart3, 
   ShieldAlert,
   Scale,
-  Sparkles
+  Sparkles,
+  Zap,
+  MessageSquare,
+  Wand2,
+  FileCheck2,
+  UserCheck
 } from 'lucide-react';
 import { UserRole } from '../types/legal';
 
@@ -31,7 +36,12 @@ export default function Sidebar({
   userRole
 }: SidebarProps) {
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin', 'Finance', 'Client'] },
+    { id: 'todays_actions', label: "Today's Actions", icon: Zap, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin'] },
+    { id: 'whatsapp', label: 'WA Proxy Hub', icon: MessageSquare, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin', 'Notary', 'Client'] },
+    { id: 'ai', label: 'AI Suite & OCR', icon: Wand2, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin'] },
+    { id: 'notary_tasks', label: 'Tugas Notaris', icon: FileCheck2, roles: ['Notary', 'Super Admin', 'Manager/Supervisor'] },
+    { id: 'client_portal', label: 'Client Mobile Timeline', icon: UserCheck, roles: ['Client', 'Super Admin'] },
+    { id: 'dashboard', label: 'Dashboard Overview', icon: LayoutDashboard, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin', 'Finance', 'Client'] },
     { id: 'workorders', label: 'Work Orders / Task', icon: FolderKanban, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin', 'Client'] },
     { id: 'clients', label: 'Klien & Perusahaan', icon: Users, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin', 'Finance'] },
     { id: 'services', label: 'Layanan Legalitas', icon: BookOpen, roles: ['Super Admin', 'Manager/Supervisor', 'Legal Staff', 'Admin', 'Client'] },
@@ -46,7 +56,7 @@ export default function Sidebar({
   const filteredMenuItems = menuItems.filter(item => item.roles.includes(userRole));
 
   return (
-    <aside className="w-64 border-r border-slate-200 dark:border-slate-800 bg-slate-900 text-slate-100 flex flex-col justify-between shrink-0">
+    <aside className="hidden lg:flex w-64 border-r border-slate-200 dark:border-slate-800 bg-slate-900 text-slate-100 flex-col justify-between shrink-0">
       <div>
         {/* Brand Header */}
         <div className="flex h-16 items-center gap-3 px-6 border-b border-slate-800">
@@ -57,13 +67,13 @@ export default function Sidebar({
             <h1 className="text-base font-extrabold tracking-tight text-white flex items-center gap-1.5">
               LexiFlow <span className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">PRO</span>
             </h1>
-            <p className="text-[11px] text-slate-400 font-medium">Legal Work OS</p>
+            <p className="text-[11px] text-slate-400 font-medium">Gotong Royong Legal OS</p>
           </div>
         </div>
 
         {/* Navigation Section */}
-        <div className="p-3 space-y-1">
-          <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Modul Utama</p>
+        <div className="p-3 space-y-1 max-h-[calc(100vh-160px)] overflow-y-auto">
+          <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Modul System</p>
           {filteredMenuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -97,13 +107,14 @@ export default function Sidebar({
         <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3">
           <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
             <Sparkles className="h-4 w-4" />
-            <span>SRS Compliance Ready</span>
+            <span>Mobile-First Gotong Royong</span>
           </div>
           <p className="mt-1 text-[11px] text-slate-400 leading-tight">
-            Sistem terintegrasi alur kerja legalitas perusahaan & kepatuhan dokumen.
+            Sistem terintegrasi WhatsApp Proxy, Action-First & AI Assistant.
           </p>
         </div>
       </div>
     </aside>
   );
 }
+
