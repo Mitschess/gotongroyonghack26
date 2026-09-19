@@ -12,6 +12,7 @@ import {
   CreditCard, 
   BarChart3, 
   ShieldAlert,
+  Archive,
   Scale,
   Sparkles,
   Zap,
@@ -38,6 +39,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const menuItems = [
     { id: 'todays_actions', label: "Today's Actions", icon: Zap, roles: ['super_admin', 'admin', 'technical'] },
+    { id: 'public_form', label: 'Back Data & ZIP Notaris', icon: Archive, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'] },
     { id: 'whatsapp', label: 'WA Proxy Hub', icon: MessageSquare, roles: ['super_admin', 'admin', 'technical', 'finance', 'notary', 'client'] },
     { id: 'ai', label: 'AI Suite & OCR', icon: Wand2, roles: ['super_admin', 'admin', 'technical'] },
     { id: 'notary_tasks', label: 'Tugas Notaris', icon: FileCheck2, roles: ['notary', 'super_admin', 'admin'] },

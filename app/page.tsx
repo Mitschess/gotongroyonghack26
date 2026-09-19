@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { ExternalLink } from 'lucide-react';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import DashboardView from '../components/DashboardView';
@@ -18,6 +19,7 @@ import WhatsAppHubView from '../components/WhatsAppHubView';
 import AIFeaturesView from '../components/AIFeaturesView';
 import ClientMobilePortalView from '../components/ClientMobilePortalView';
 import NotaryPortalView from '../components/NotaryPortalView';
+import PublicFormView from '../components/PublicFormView';
 import MobileNav from '../components/MobileNav';
 import LoginPage from '../components/LoginPage';
 
@@ -58,8 +60,8 @@ import {
 } from '../types/legal';
 
 export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
-  const [currentUser, setCurrentUser] = useState<User>(INITIAL_USERS[1]); // Maya Putri, S.H. (Manager)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<User>(INITIAL_USERS[0]); // Default Super Admin / Login User
   const [users] = useState<User[]>(INITIAL_USERS);
   
   const [clients, setClients] = useState<Client[]>(INITIAL_CLIENTS);
@@ -80,6 +82,66 @@ export default function Home() {
 
   // Selected Work Order for deep view
   const [selectedWoFromDashboard, setSelectedWoFromDashboard] = useState<WorkOrder | null>(null);
+
+  // WA Toast Notification State
+  const [waToast, setWaToast] = useState<{
+    show: boolean;
+    message: string;
+    waLink: string;
+  } | null>(null);
+
+  // Helper to trigger automated WhatsApp Notification to +6281515716564
+  const triggerWaNotification = async (woNumber: string, clientName: string, updateDetail: string) => {
+    const targetPhone = '0815-1571-6564';
+    const rawNumber = '6281515716564';
+    const msgText = `🔔 *[LexiFlow WO Update]*\n📋 Work Order: *${woNumber}*\n🏢 Klien: *${clientName}*\n📌 Status: ${updateDetail}\n\nDiproses oleh: ${currentUser.name} (${currentUser.role})\n⏰ Waktu: ${new Date().toLocaleTimeString('id-ID')} WIB`;
+
+    // 1. Dispatch into WhatsApp Messages state
+    const newWaMsg: WhatsAppMessage = {
+      id: `wa-${Date.now()}`,
+      workOrderId: woNumber,
+      workOrderNumber: woNumber,
+      senderRole: 'Platform',
+      senderName: 'System Bot LexiFlow (WA Gateway API)',
+      maskedPhone: targetPhone,
+      recipientRole: 'Client',
+      messageText: msgText,
+      timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+      resolutionMethod: 'SINGLE_ACTIVE',
+      status: 'SENT'
+    };
+
+    setWhatsappMessages(prev => [newWaMsg, ...prev]);
+    addNotification('WhatsApp Sent', `Notifikasi WO ${woNumber} dikirim ke ${targetPhone}`, 'whatsapp');
+
+    // 2. Automated background POST request to API Route Gateway (/api/whatsapp/send)
+    try {
+      await fetch('/api/whatsapp/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetPhone: rawNumber,
+          messageText: msgText,
+          woNumber
+        })
+      });
+    } catch (err) {
+      console.log('WA Gateway background trigger:', err);
+    }
+
+    // 3. Show floating WA toast banner with direct link (Instant backup)
+    const waUrl = `https://wa.me/${rawNumber}?text=${encodeURIComponent(msgText)}`;
+    setWaToast({
+      show: true,
+      message: `WO ${woNumber}: ${updateDetail}`,
+      waLink: waUrl
+    });
+
+    // Auto hide toast after 6 seconds
+    setTimeout(() => {
+      setWaToast(null);
+    }, 6000);
+  };
 
   // Helper to log audit activity
   const logActivity = (action: string, targetObject: string) => {
@@ -239,14 +301,20 @@ export default function Home() {
     setWorkOrders(prev => [newWo, ...prev]);
     logActivity('Pembuatan Work Order', `${newWo.woNumber} - ${newWo.clientName}`);
     addNotification('Work Order Baru', `WO ${newWo.woNumber} ditugaskan kepada ${newWo.picStaffName}`, 'task');
+    triggerWaNotification(newWo.woNumber, newWo.clientName, 'Work Order Baru Dibuat & Ditugaskan');
   };
 
   const handleUpdateWorkOrderStatus = (woId: string, status: WorkOrderStatus) => {
+    const targetWo = workOrders.find(w => w.id === woId);
     setWorkOrders(prev => prev.map(w => w.id === woId ? { ...w, status } : w));
     logActivity('Perubahan Status WO', `WO ID ${woId} diubah ke ${status}`);
+    if (targetWo) {
+      triggerWaNotification(targetWo.woNumber, targetWo.clientName, `Status Diubah ke [${status}]`);
+    }
   };
 
   const handleAdvanceWorkflowStage = (woId: string) => {
+    const targetWo = workOrders.find(w => w.id === woId);
     setWorkOrders(prev => prev.map(w => {
       if (w.id !== woId) return w;
       const nextIdx = Math.min(w.currentStageIndex + 1, w.workflow.length - 1);
@@ -269,6 +337,10 @@ export default function Home() {
       };
     }));
     logActivity('Advance Workflow Stage', `Progres WO ${woId} ditingkatkan`);
+    if (targetWo) {
+      const nextStageName = targetWo.workflow[Math.min(targetWo.currentStageIndex + 1, targetWo.workflow.length - 1)]?.stageName || 'Tahap Selanjutnya';
+      triggerWaNotification(targetWo.woNumber, targetWo.clientName, `Tahap Berhasil Di-Advance ke [${nextStageName}]`);
+    }
   };
 
   const handleAddTask = (newTaskData: Partial<Task>) => {
@@ -376,6 +448,7 @@ export default function Home() {
   };
 
   const handleDecisionSubmit = (approvalId: string, status: ApprovalStatus, comments: string) => {
+    const targetApp = approvals.find(a => a.id === approvalId);
     setApprovals(prev => prev.map(a => a.id === approvalId ? {
       ...a,
       status,
@@ -386,6 +459,9 @@ export default function Home() {
 
     logActivity('Keputusan Approval Supervisor', `Approval ${approvalId} set status ${status}`);
     addNotification('Status Approval Diperbarui', `Approval ${approvalId} telah di-${status} oleh ${currentUser.name}`, 'approval');
+    if (targetApp) {
+      triggerWaNotification(targetApp.workOrderNumber, targetApp.workOrderTitle, `Persetujuan Supervisor: [${status}] - "${comments}"`);
+    }
   };
 
   const handleAddEvent = (newEventData: Partial<CalendarEvent>) => {
@@ -447,6 +523,15 @@ export default function Home() {
         onLogin={(user) => {
           setCurrentUser(user);
           setIsAuthenticated(true);
+          if (user.role === 'client') {
+            setActiveTab('client_portal');
+          } else if (user.role === 'notary') {
+            setActiveTab('notary_tasks');
+          } else if (user.role === 'finance') {
+            setActiveTab('finance');
+          } else {
+            setActiveTab('todays_actions');
+          }
           logActivity('User Login', `Berhasil masuk sebagai ${user.name} (${user.role})`);
         }} 
       />
@@ -509,6 +594,10 @@ export default function Home() {
                 }
               }}
             />
+          )}
+
+          {activeTab === 'public_form' && (
+            <PublicFormView />
           )}
 
           {activeTab === 'whatsapp' && (
@@ -659,6 +748,36 @@ export default function Home() {
           )}
         </main>
       </div>
+
+      {/* Floating Automated WA Notification Toast targeting wa.me/6281515716564 */}
+      {waToast && waToast.show && (
+        <div className="fixed bottom-20 sm:bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="bg-slate-900 text-white rounded-2xl p-4 shadow-2xl border border-emerald-500/50 max-w-md flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center font-black text-base shrink-0 shadow-md">
+              WA
+            </div>
+            <div className="flex-1 min-w-0 text-xs">
+              <p className="font-extrabold text-emerald-400">Notifikasi WA Terkirim ke +6281515716564</p>
+              <p className="text-slate-300 truncate mt-0.5 font-medium">{waToast.message}</p>
+            </div>
+            <a
+              href={waToast.waLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs shrink-0 transition-all flex items-center gap-1 shadow-sm"
+            >
+              <span>Buka WA</span>
+              <ExternalLink className="h-3 w-3" />
+            </a>
+            <button 
+              onClick={() => setWaToast(null)}
+              className="text-slate-400 hover:text-white text-xs p-1"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Touch-Optimized Mobile Navigation Bar */}
       <MobileNav
