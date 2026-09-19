@@ -88,7 +88,8 @@ export function canAccessTab(role: UserRole, tabId: string): boolean {
 /**
  * Filter Work Orders strictly based on IAM role and user context
  */
-export function scopeWorkOrders(workOrders: WorkOrder[], user: User): WorkOrder[] {
+export function scopeWorkOrders(workOrders: WorkOrder[], user?: User): WorkOrder[] {
+  if (!user) return workOrders;
   if (user.role === 'client') {
     return workOrders.filter(w => 
       w.clientId === user.linkedClientId || 
@@ -98,7 +99,7 @@ export function scopeWorkOrders(workOrders: WorkOrder[], user: User): WorkOrder[
   if (user.role === 'notary') {
     return workOrders.filter(w => 
       w.notaryId === user.id || 
-      w.notaryName?.toLowerCase().includes(user.name.toLowerCase())
+      (w.notaryName && w.notaryName.toLowerCase().includes(user.name.toLowerCase()))
     );
   }
   return workOrders;
@@ -107,14 +108,15 @@ export function scopeWorkOrders(workOrders: WorkOrder[], user: User): WorkOrder[
 /**
  * Filter Legal Documents strictly based on IAM role and confidentiality level
  */
-export function scopeDocuments(documents: LegalDocument[], user: User, workOrders: WorkOrder[]): LegalDocument[] {
+export function scopeDocuments(documents: LegalDocument[], user?: User, workOrders: WorkOrder[] = []): LegalDocument[] {
+  if (!user) return documents;
   if (user.role === 'client') {
     return documents.filter(d => 
       d.clientId === user.linkedClientId && d.accessLevel !== 'Confidential'
     );
   }
   if (user.role === 'notary') {
-    const assignedWoIds = workOrders.filter(w => w.notaryId === user.id || w.notaryName?.includes(user.name)).map(w => w.id);
+    const assignedWoIds = workOrders.filter(w => w.notaryId === user.id || (w.notaryName && w.notaryName.includes(user.name))).map(w => w.id);
     return documents.filter(d => 
       d.accessLevel !== 'Confidential' && (!d.workOrderId || assignedWoIds.includes(d.workOrderId))
     );
@@ -128,7 +130,8 @@ export function scopeDocuments(documents: LegalDocument[], user: User, workOrder
 /**
  * Filter Invoices based on IAM role
  */
-export function scopeInvoices(invoices: Invoice[], user: User): Invoice[] {
+export function scopeInvoices(invoices: Invoice[], user?: User): Invoice[] {
+  if (!user) return invoices;
   if (user.role === 'client') {
     return invoices.filter(i => i.clientId === user.linkedClientId);
   }

@@ -476,7 +476,8 @@ export default function DashboardView({
           </div>
           )}
 
-          {/* Activity Timeline */}
+          {/* Activity Timeline — Staff / Notary only (Hidden for Client) */}
+          {!isClient && (
           <div className="rounded-2xl bg-white border border-slate-200 shadow-xs">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
               <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900">
@@ -513,6 +514,7 @@ export default function DashboardView({
               ))}
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>

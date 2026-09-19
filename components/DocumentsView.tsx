@@ -18,12 +18,14 @@ import {
   Building2,
   CheckCircle2
 } from 'lucide-react';
-import { LegalDocument, DocumentCategory, Client, WorkOrder } from '../types/legal';
+import { LegalDocument, DocumentCategory, Client, WorkOrder, User } from '../types/legal';
+import { scopeDocuments } from '../lib/iam';
 
 interface DocumentsViewProps {
   documents: LegalDocument[];
   clients: Client[];
   workOrders: WorkOrder[];
+  currentUser: User;
   onUploadDocument: (newDoc: Partial<LegalDocument>) => void;
 }
 
@@ -31,6 +33,7 @@ export default function DocumentsView({
   documents,
   clients,
   workOrders,
+  currentUser,
   onUploadDocument
 }: DocumentsViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,7 +60,10 @@ export default function DocumentsView({
     'Other'
   ];
 
-  const filteredDocs = documents.filter(d => {
+  // Scoped documents via IAM Policy
+  const scopedDocs = scopeDocuments(documents, currentUser, workOrders);
+
+  const filteredDocs = scopedDocs.filter(d => {
     const matchesSearch = d.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           d.docNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           d.clientName.toLowerCase().includes(searchQuery.toLowerCase());

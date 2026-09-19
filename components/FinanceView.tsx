@@ -13,12 +13,14 @@ import {
   X,
   Building2
 } from 'lucide-react';
-import { Invoice, InvoiceStatus, Client, WorkOrder } from '../types/legal';
+import { Invoice, InvoiceStatus, Client, WorkOrder, User } from '../types/legal';
+import { scopeInvoices, canManageFinance } from '../lib/iam';
 
 interface FinanceViewProps {
   invoices: Invoice[];
   clients: Client[];
   workOrders: WorkOrder[];
+  currentUser: User;
   onAddInvoice: (newInvoice: Partial<Invoice>) => void;
   onRecordPayment: (invoiceId: string, amount: number, method: string) => void;
 }
@@ -27,6 +29,7 @@ export default function FinanceView({
   invoices,
   clients,
   workOrders,
+  currentUser,
   onAddInvoice,
   onRecordPayment
 }: FinanceViewProps) {
@@ -45,7 +48,10 @@ export default function FinanceView({
   const [payAmount, setPayAmount] = useState(0);
   const [payMethod, setPayMethod] = useState('Transfer Bank BCA');
 
-  const filteredInvoices = invoices.filter(inv => {
+  // IAM Scoped Invoices
+  const scopedInvoices = scopeInvoices(invoices, currentUser);
+
+  const filteredInvoices = scopedInvoices.filter(inv => {
     return statusFilter === 'all' || inv.status === statusFilter;
   });
 
@@ -99,12 +105,14 @@ export default function FinanceView({
           <p className="text-xs text-slate-500">Penerbitan tagihan, status pembayaran DP / pelunasan (FR-32 & FR-33)</p>
         </div>
 
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-xs font-bold text-white shadow-md transition-all self-start sm:self-auto"
-        >
-          <Plus className="h-4 w-4" /> Terbitkan Invoice Baru
-        </button>
+        {canManageFinance(currentUser.role) && (
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-xs font-bold text-white shadow-md transition-all self-start sm:self-auto cursor-pointer"
+          >
+            <Plus className="h-4 w-4" /> Terbitkan Invoice Baru
+          </button>
+        )}
       </div>
 
       {/* Financial Summary Cards */}

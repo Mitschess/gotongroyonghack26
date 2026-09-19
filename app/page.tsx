@@ -22,6 +22,8 @@ import NotaryPortalView from '../components/NotaryPortalView';
 import PublicFormView from '../components/PublicFormView';
 import MobileNav from '../components/MobileNav';
 import LoginPage from '../components/LoginPage';
+import IamGuard from '../components/IamGuard';
+import { canAccessTab, IAM_DEFAULT_LANDING } from '../lib/iam';
 
 import { 
   INITIAL_USERS, 
@@ -627,125 +629,175 @@ export default function Home() {
           )}
 
           {activeTab === 'notary_tasks' && (
-            <NotaryPortalView
-              workOrders={workOrders}
-              tasks={tasks}
-              notaryName={currentUser.name}
-              onUploadDocument={handleUploadDocument}
-              onNavigateTab={(tab) => setActiveTab(tab)}
-            />
-          )}
-
-          {activeTab === 'dashboard' && (
-            <DashboardView
-              workOrders={workOrders}
-              clients={clients}
-              tasks={tasks}
-              approvals={approvals}
-              activityLogs={activityLogs}
-              users={users}
-              currentUser={currentUser}
-              onNavigateTab={(tab) => setActiveTab(tab)}
-              onSelectWorkOrder={(wo) => {
-                setSelectedWoFromDashboard(wo);
-                setActiveTab('workorders');
-              }}
-            />
-          )}
-
-          {activeTab === 'workorders' && (
-            <WorkOrdersView
-              workOrders={workOrders}
-              clients={clients}
-              services={services}
-              tasks={tasks}
-              documents={documents}
-              workNotes={workNotes}
+          {!canAccessTab(currentUser.role, activeTab) ? (
+            <IamGuard
               userRole={currentUser.role}
-              currentUserId={currentUser.id}
-              selectedWorkOrder={selectedWoFromDashboard}
-              onClearSelectedWorkOrder={() => setSelectedWoFromDashboard(null)}
-              onAddWorkOrder={handleAddWorkOrder}
-              onUpdateWorkOrderStatus={handleUpdateWorkOrderStatus}
-              onAdvanceWorkflowStage={handleAdvanceWorkflowStage}
-              onAddTask={handleAddTask}
-              onUpdateTaskStatus={handleUpdateTaskStatus}
-              onAddWorkNote={handleAddWorkNote}
-              onRequestApproval={handleRequestApproval}
+              userName={currentUser.name}
+              tabId={activeTab}
+              onNavigateTab={(t) => setActiveTab(t)}
             />
-          )}
+          ) : (
+            <>
+              {activeTab === 'todays_actions' && (
+                <TodaysActionsView
+                  workOrders={workOrders}
+                  tasks={tasks}
+                  approvals={approvals}
+                  onNavigateTab={(tab) => setActiveTab(tab)}
+                  onSelectWorkOrder={(wo) => {
+                    setSelectedWoFromDashboard(wo);
+                    setActiveTab('workorders');
+                  }}
+                />
+              )}
 
-          {activeTab === 'clients' && (
-            <ClientsView
-              clients={clients}
-              workOrders={workOrders}
-              documents={documents}
-              onAddClient={handleAddClient}
-              onSelectWorkOrder={(wo) => {
-                setSelectedWoFromDashboard(wo);
-                setActiveTab('workorders');
-              }}
-            />
-          )}
+              {activeTab === 'dashboard' && (
+                <DashboardView
+                  currentUser={currentUser}
+                  userRole={currentUser.role}
+                  workOrders={workOrders}
+                  services={services}
+                  clients={clients}
+                  invoices={invoices}
+                  approvals={approvals}
+                  activityLogs={activityLogs}
+                  onNavigateTab={(tab) => setActiveTab(tab)}
+                  onSelectWorkOrder={(wo) => {
+                    setSelectedWoFromDashboard(wo);
+                    setActiveTab('workorders');
+                  }}
+                />
+              )}
 
-          {activeTab === 'services' && (
-            <ServicesView
-              services={services}
-              clients={clients}
-              onAddService={handleAddService}
-              onRequestServiceSubmit={handleRequestServiceSubmit}
-            />
-          )}
+              {activeTab === 'workorders' && (
+                <WorkOrdersView
+                  workOrders={workOrders}
+                  clients={clients}
+                  services={services}
+                  tasks={tasks}
+                  documents={documents}
+                  workNotes={workNotes}
+                  userRole={currentUser.role}
+                  currentUserId={currentUser.id}
+                  selectedWorkOrder={selectedWoFromDashboard}
+                  onClearSelectedWorkOrder={() => setSelectedWoFromDashboard(null)}
+                  onAddWorkOrder={handleAddWorkOrder}
+                  onUpdateWorkOrderStatus={handleUpdateWorkOrderStatus}
+                  onAdvanceWorkflowStage={handleAdvanceWorkflowStage}
+                  onAddTask={handleAddTask}
+                  onUpdateTaskStatus={handleUpdateTaskStatus}
+                  onAddWorkNote={handleAddWorkNote}
+                  onRequestApproval={handleRequestApproval}
+                />
+              )}
 
-          {activeTab === 'documents' && (
-            <DocumentsView
-              documents={documents}
-              clients={clients}
-              workOrders={workOrders}
-              onUploadDocument={handleUploadDocument}
-            />
-          )}
+              {activeTab === 'clients' && (
+                <ClientsView
+                  clients={clients}
+                  workOrders={workOrders}
+                  documents={documents}
+                  onAddClient={handleAddClient}
+                  onSelectWorkOrder={(wo) => {
+                    setSelectedWoFromDashboard(wo);
+                    setActiveTab('workorders');
+                  }}
+                />
+              )}
 
-          {activeTab === 'approvals' && (
-            <ApprovalsView
-              approvals={approvals}
-              userRole={currentUser.role}
-              currentUserName={currentUser.name}
-              onDecisionSubmit={handleDecisionSubmit}
-            />
-          )}
+              {activeTab === 'services' && (
+                <ServicesView
+                  services={services}
+                  clients={clients}
+                  onAddService={handleAddService}
+                  onRequestServiceSubmit={handleRequestServiceSubmit}
+                />
+              )}
 
-          {activeTab === 'calendar' && (
-            <CalendarView
-              events={calendarEvents}
-              onAddEvent={handleAddEvent}
-            />
-          )}
+              {activeTab === 'documents' && (
+                <DocumentsView
+                  documents={documents}
+                  clients={clients}
+                  workOrders={workOrders}
+                  currentUser={currentUser}
+                  onUploadDocument={handleUploadDocument}
+                />
+              )}
 
-          {activeTab === 'finance' && (
-            <FinanceView
-              invoices={invoices}
-              clients={clients}
-              workOrders={workOrders}
-              onAddInvoice={handleAddInvoice}
-              onRecordPayment={handleRecordPayment}
-            />
-          )}
+              {activeTab === 'approvals' && (
+                <ApprovalsView
+                  approvals={approvals}
+                  userRole={currentUser.role}
+                  currentUserName={currentUser.name}
+                  onDecisionSubmit={handleDecisionSubmit}
+                />
+              )}
 
-          {activeTab === 'reports' && (
-            <ReportsView
-              workOrders={workOrders}
-              services={services}
-              clients={clients}
-              users={users}
-            />
-          )}
+              {activeTab === 'calendar' && (
+                <CalendarView
+                  events={calendarEvents}
+                  onAddEvent={handleAddEvent}
+                />
+              )}
 
-          {activeTab === 'audit' && (
-            <AuditLogView
-              activityLogs={activityLogs}
-              users={users}
-            />
+              {activeTab === 'finance' && (
+                <FinanceView
+                  invoices={invoices}
+                  clients={clients}
+                  workOrders={workOrders}
+                  currentUser={currentUser}
+                  onAddInvoice={handleAddInvoice}
+                  onRecordPayment={handleRecordPayment}
+                />
+              )}
+
+              {activeTab === 'reports' && (
+                <ReportsView
+                  workOrders={workOrders}
+                  services={services}
+                  clients={clients}
+                  users={users}
+                />
+              )}
+
+              {activeTab === 'audit' && (
+                <AuditLogView
+                  activityLogs={activityLogs}
+                  users={users}
+                />
+              )}
+
+              {activeTab === 'public_form' && (
+                <PublicFormView
+                  workOrders={workOrders}
+                  documents={documents}
+                  userRole={currentUser.role}
+                />
+              )}
+
+              {activeTab === 'whatsapp' && (
+                <WhatsAppHubView
+                  messages={waMessages}
+                  onSendMessage={handleSendWaMessage}
+                />
+              )}
+
+              {activeTab === 'ai' && (
+                <AIFeaturesView
+                  documents={documents}
+                  workOrders={workOrders}
+                />
+              )}
+
+              {activeTab === 'notary_tasks' && (
+                <NotaryPortalView
+                  workOrders={workOrders}
+                  documents={documents}
+                  currentUser={currentUser}
+                  onUploadDocument={handleUploadDocument}
+                  onAdvanceWorkflowStage={handleAdvanceWorkflowStage}
+                />
+              )}
+            </>
           )}
         </main>
       </div>
